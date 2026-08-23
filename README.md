@@ -1,4 +1,4 @@
-# TempSensors
+# Thermal
 
 A temperature monitor for Apple Silicon Macs (M1–M4). Runs as a **menu bar app** or a **terminal dashboard** from the same executable. No sudo required. macOS 13+.
 
@@ -26,11 +26,11 @@ Reads every thermal sensor the machine exposes, translates ~250 cryptic channels
 ## Run
 
 ```bash
-swift run tempsensors            # menu bar app (Ctrl-C or Quit to stop)
-swift run tempsensors --cli      # terminal dashboard, one snapshot
-swift run tempsensors --watch    # live terminal dashboard, 2s refresh
-swift run tempsensors --raw      # raw sensor list with group mapping (debugging)
-swift run tempsensors --watch --raw
+swift run thermal            # menu bar app (Ctrl-C or Quit to stop)
+swift run thermal --cli      # terminal dashboard, one snapshot
+swift run thermal --watch    # live terminal dashboard, 2s refresh
+swift run thermal --raw      # raw sensor list with group mapping (debugging)
+swift run thermal --watch --raw
 ```
 
 The menu bar app shows the hottest group's temperature; clicking opens the dashboard popover. Click the °C/°F label to switch units (persisted). Hover a heat-source row to reveal a quit button. Appearance follows the system.
@@ -47,7 +47,7 @@ Sources/
       CPrivateHID.h          private IOHIDEventSystemClient declarations
       CSMC.h                 AppleSMC user-client struct + selectors
     shim.c
-  tempsensors/
+  thermal/
     SensorReader.swift       HID sensor hub reader (die temps, NAND, battery)
     SMCReader.swift          SMC reader: temps, fans, generic key access
     SensorLabeler.swift      names -> groups, statuses, dedup, placeholder filter

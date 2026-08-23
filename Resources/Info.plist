@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>tempsensors</string>
+	<string>thermal</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.igorlourenco.thermal</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -28,5 +28,20 @@
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2026 Igor Lourenço</string>
 	<!-- Private HID/SMC APIs: App Sandbox must stay OFF (see CLAUDE.md). -->
+	<!-- Sparkle (installer.md §4). Feed lives on the repo's main branch;
+	     scripts/appcast.sh regenerates it. Public key pairs with the EdDSA
+	     private key in the login Keychain (generate_keys). -->
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/igorlourenco/thermal/main/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>TvGFnToN5ax3xTb3n2Yv9DEIcOKVeqamCO4ut12obGo=</string>
+	<!-- No first-launch permission prompt; the Settings toggle governs both
+	     checking and auto-install, seeded on (spec: checkbox ships checked). -->
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUAutomaticallyUpdate</key>
+	<true/>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 </dict>
 </plist>

@@ -21,4 +21,7 @@ DerivedData/
 
 # Editors
 .vscode/
-.idea/dist/
+.idea/
+
+# Build output (apps, DMGs, generated previews)
+dist/

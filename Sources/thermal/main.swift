@@ -1,12 +1,12 @@
 import Foundation
 
 // Usage:
-//   swift run tempsensors            -> launches the MENU BAR APP
-//   swift run tempsensors --demo hot -> app with prototype seed data (cool|warm|hot)
-//   swift run tempsensors --cli      -> terminal dashboard snapshot
-//   swift run tempsensors --watch    -> live terminal dashboard, 2s refresh
-//   swift run tempsensors --raw      -> raw sensor list (debugging)
-//   swift run tempsensors --watch --raw
+//   swift run thermal            -> launches the MENU BAR APP
+//   swift run thermal --demo hot -> app with prototype seed data (cool|warm|hot)
+//   swift run thermal --cli      -> terminal dashboard snapshot
+//   swift run thermal --watch    -> live terminal dashboard, 2s refresh
+//   swift run thermal --raw      -> raw sensor list (debugging)
+//   swift run thermal --watch --raw
 
 let cliFlags = ["--cli", "--watch", "--raw"]
 let isCLIMode = CommandLine.arguments.contains(where: cliFlags.contains)

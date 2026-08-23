@@ -1,6 +1,7 @@
 import SwiftUI
 import IOKit
 import ServiceManagement
+import Sparkle
 
 // =============================================================================
 // ThermalModel.swift
@@ -126,6 +127,14 @@ final class ThermalModel: ObservableObject {
         }
     }
     @Published var notifyThresholdC: Double { didSet { defaults.set(notifyThresholdC, forKey: "notifyThresholdC") } }
+    /// One switch for both Sparkle behaviours (check + download/install);
+    /// Sparkle persists them itself. Seeded on via Info.plist (installer.md §4).
+    @Published var updateAutomatically: Bool {
+        didSet {
+            updaterController?.updater.automaticallyChecksForUpdates = updateAutomatically
+            updaterController?.updater.automaticallyDownloadsUpdates = updateAutomatically
+        }
+    }
 
     private(set) var hasCompletedFirstRun: Bool {
         get { defaults.bool(forKey: "hasCompletedFirstRun") }
@@ -146,6 +155,11 @@ final class ThermalModel: ObservableObject {
     private var connectTask: Task<Void, Never>?
     private var terminationObserver: NSObjectProtocol?
 
+    /// nil when running unbundled (`swift run`) — Sparkle needs the .app
+    /// wrapper (Info.plist, Frameworks/). Settings shows the row disabled.
+    private var updaterController: SPUStandardUpdaterController?
+    private let updaterDelegate = UpdaterFeedDelegate()
+
     /// In-memory fan RPM samples for the session sparkline (temps persist in
     /// HistoryStore; fan speed does not — yet).
     private(set) var fanSamples: [(date: Date, rpm: Double)] = []
@@ -163,8 +177,19 @@ final class ThermalModel: ObservableObject {
         launchAtLogin = defaults.bool(forKey: "launchAtLogin")
         let storedThreshold = defaults.double(forKey: "notifyThresholdC")
         notifyThresholdC = storedThreshold >= 60 ? min(100, storedThreshold) : 90
+        updateAutomatically = false // reconciled below once the updater exists
 
         phase = .onboarding(step: 0)
+
+        if Bundle.main.bundleIdentifier != nil {
+            let controller = SPUStandardUpdaterController(
+                startingUpdater: true,
+                updaterDelegate: updaterDelegate,
+                userDriverDelegate: nil
+            )
+            updaterController = controller
+            updateAutomatically = controller.updater.automaticallyChecksForUpdates
+        }
 
         if demo == nil {
             hid = SensorReader()
@@ -215,6 +240,19 @@ final class ThermalModel: ObservableObject {
             smc = SMCReader()
         }
         connect()
+    }
+
+    // MARK: Updates (installer.md §4)
+
+    var canCheckForUpdates: Bool { updaterController != nil }
+
+    var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
+    }
+
+    /// User-initiated check; Sparkle shows its own UI from here.
+    func checkForUpdates() {
+        updaterController?.checkForUpdates(nil)
     }
 
     func advanceOnboarding() {
@@ -588,5 +626,17 @@ final class ThermalModel: ObservableObject {
         sysctlbyname("machdep.cpu.brand_string", &buffer, &size, nil, 0)
         let brand = String(cString: buffer)
         return brand.hasPrefix("Apple ") ? String(brand.dropFirst(6)) : brand
+    }
+}
+
+// MARK: - Sparkle feed override
+
+/// Lets a local appcast stand in for the real feed while testing updates
+/// (scripts/test-update.sh sets it):
+///   defaults write com.igorlourenco.thermal ThermalFeedURLOverride http://localhost:8000/appcast.xml
+/// Unset, Sparkle falls through to SUFeedURL in Info.plist.
+private final class UpdaterFeedDelegate: NSObject, SPUUpdaterDelegate {
+    func feedURLString(for updater: SPUUpdater) -> String? {
+        UserDefaults.standard.string(forKey: "ThermalFeedURLOverride")
     }
 }

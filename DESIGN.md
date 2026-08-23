@@ -391,7 +391,7 @@ switch automatically.
 
 ### 4.8 Settings
 
-One card, seven rows, each 11pt vertical:
+Main card, six rows, each 11pt vertical:
 
 1. **Units** — segmented `°C` / `°F`. Two independent targets: re-picking the
  active unit must not toggle.
@@ -408,8 +408,19 @@ One card, seven rows, each 11pt vertical:
 5. **Launch at login** — 38×22 switch, 18pt knob, `toggleOn` when on. Seed on.
 6. **Notify above** — sub-line "Only for sustained highs, never for spikes", and
  a `− 90° +` stepper clamped to 60–100 °C.
-7. Footer row outside the card: "Sensor service · reconnect" (→ connecting) and
- "Replay setup" (→ first run), both 11pt `textDim`.
+
+A second **Updates card** below (10pt gap), two rows:
+
+1. **Updates** — sub-line "You have Thermal 1.0" (current version), and a
+ `Check now` chip that triggers a user-initiated Sparkle check
+ (installer.md §4).
+2. **Update automatically** — 38×22 switch, seed on. Drives Sparkle's check
+ and download/install together. Both rows dim when running unbundled
+ (`swift run`), where Sparkle can't operate.
+
+Footer row outside the cards: "Reconnect" (→ connecting), "Replay setup"
+(→ first run), and "Quit Thermal" (quits the app), all 11pt `textDim` — copy
+short enough that the row never wraps at 360pt.
 
 ### 4.9 Zen
 

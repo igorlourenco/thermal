@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!-- Release-notes template (installer.md §4). Sparkle renders this inside its
+     recessed box; these styles supply the type inside it: 12.5px semibold
+     version + dimmed date, then ·-led 11.5/1.5 lines, last line dimmer folding
+     in the previous patch. Duplicate per release as
+     dist/updates/Thermal-<version>.html and fill in real, user-visible
+     changes — never commit messages. -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    body {
+        margin: 0;
+        padding: 12px 14px;
+        background: rgb(28, 28, 31);
+        font: 11.5px/1.5 -apple-system, "Helvetica Neue", sans-serif;
+        color: rgba(255, 255, 255, 0.62);
+    }
+    h2 {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #F2F2F4;
+        margin: 0 0 6px;
+    }
+    h2 .date {
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.4);
+        margin-left: 6px;
+    }
+    ul { list-style: none; margin: 0; padding: 0; }
+    li::before { content: "· "; }
+    .prev { color: rgba(255, 255, 255, 0.4); }
+</style>
+</head>
+<body>
+<h2>Thermal 1.1 <span class="date">May 12, 2026</span></h2>
+<ul>
+    <li>Throttle log — every time macOS slowed your Mac down, and what caused it.</li>
+    <li>Fan curves now show target vs. actual speed.</li>
+    <li class="prev">Also includes 1.0.1: fixed sensors misread on M4 Max.</li>
+</ul>
+</body>
+</html>

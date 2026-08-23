@@ -28,14 +28,25 @@ done
 echo "Building ($CONFIG)…"
 swift build -c "$CONFIG"
 
-BINARY=".build/$CONFIG/tempsensors"
+BINARY=".build/$CONFIG/thermal"
 APP="dist/Thermal.app"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 
-cp "$BINARY" "$APP/Contents/MacOS/tempsensors"
+cp "$BINARY" "$APP/Contents/MacOS/thermal"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
+
+# Sparkle.framework (updates, installer.md §4). The binary's rpath points at
+# ../Frameworks (set in Package.swift); SwiftPM's artifact checkout has the
+# actual framework.
+SPARKLE=".build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework"
+if [ -d "$SPARKLE" ]; then
+    mkdir -p "$APP/Contents/Frameworks"
+    cp -R "$SPARKLE" "$APP/Contents/Frameworks/"
+else
+    echo "warning: Sparkle.framework not found at $SPARKLE — updates won't work" >&2
+fi
 
 # App icon, once one exists.
 if [ -f Resources/Thermal.icns ]; then
@@ -44,9 +55,23 @@ if [ -f Resources/Thermal.icns ]; then
         || /usr/libexec/PlistBuddy -c "Set :CFBundleIconFile Thermal" "$APP/Contents/Info.plist"
 fi
 
-# Ad-hoc signature is enough for local use (notifications, launch-at-login).
-# Distribution needs a Developer ID + notarization: set SIGN_IDENTITY.
-codesign --force --sign "${SIGN_IDENTITY:--}" "$APP"
+# Ad-hoc signature is enough for local use (notifications, launch-at-login);
+# Sparkle ships pre-signed by its project and can keep that signature. For
+# distribution (Developer ID + notarization), Sparkle's nested code must be
+# re-signed with our identity and the hardened runtime, inside-out.
+if [ -n "${SIGN_IDENTITY:-}" ]; then
+    FW="$APP/Contents/Frameworks/Sparkle.framework"
+    if [ -d "$FW" ]; then
+        codesign -f -s "$SIGN_IDENTITY" -o runtime "$FW/Versions/B/XPCServices/Installer.xpc"
+        codesign -f -s "$SIGN_IDENTITY" -o runtime --preserve-metadata=entitlements "$FW/Versions/B/XPCServices/Downloader.xpc"
+        codesign -f -s "$SIGN_IDENTITY" -o runtime "$FW/Versions/B/Autoupdate"
+        codesign -f -s "$SIGN_IDENTITY" -o runtime "$FW/Versions/B/Updater.app"
+        codesign -f -s "$SIGN_IDENTITY" -o runtime "$FW"
+    fi
+    codesign --force --sign "$SIGN_IDENTITY" -o runtime "$APP"
+else
+    codesign --force --sign - "$APP"
+fi
 
 echo "Built $APP"
 

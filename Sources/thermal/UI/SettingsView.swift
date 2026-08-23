@@ -16,6 +16,10 @@ struct SettingsView: View {
                 .padding(.horizontal, 14)
                 .padding(.top, 14)
 
+            updatesCard
+                .padding(.horizontal, 14)
+                .padding(.top, 10)
+
             Spacer(minLength: 0)
 
             footerRow
@@ -101,6 +105,40 @@ struct SettingsView: View {
         .card()
     }
 
+    /// Updates get their own card (installer.md §4): version + manual check,
+    /// and the one switch driving Sparkle's check + auto-install.
+    private var updatesCard: some View {
+        VStack(spacing: 0) {
+            row(divider: true) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Updates")
+                        .font(.system(size: 13))
+                        .foregroundStyle(theme.textStrong)
+                    Text(model.canCheckForUpdates
+                         ? "You have Thermal \(model.appVersion)"
+                         : "Available in the installed app")
+                        .font(.system(size: 11))
+                        .foregroundStyle(theme.textDim)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                ChipButton(label: "Check now", enabled: model.canCheckForUpdates) {
+                    model.checkForUpdates()
+                }
+            }
+
+            row(divider: false) {
+                rowLabel("Update automatically")
+                GlassToggle(isOn: $model.updateAutomatically)
+                    .opacity(model.canCheckForUpdates ? 1 : 0.4)
+                    .allowsHitTesting(model.canCheckForUpdates)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 2)
+        .card()
+    }
+
     private func rowLabel(_ text: String) -> some View {
         Text(text)
             .font(.system(size: 13))
@@ -169,10 +207,11 @@ struct SettingsView: View {
     // MARK: Footer row
 
     private var footerRow: some View {
-        HStack {
-            FooterLink(title: "Sensor service · reconnect") { model.connect() }
+        HStack(spacing: 16) {
+            FooterLink(title: "Reconnect") { model.connect() }
             Spacer()
             FooterLink(title: "Replay setup") { model.replaySetup() }
+            FooterLink(title: "Quit Thermal") { NSApplication.shared.terminate(nil) }
         }
     }
 }
@@ -199,6 +238,28 @@ private struct StyleDropdownButton: View {
             .contentShape(Rectangle())
             .onHover { hovering = $0 }
             .onTapGesture(perform: action)
+    }
+}
+
+private struct ChipButton: View {
+    @Environment(\.theme) private var theme
+    let label: String
+    var enabled = true
+    let action: () -> Void
+    @State private var hovering = false
+
+    var body: some View {
+        Text(label)
+            .font(.system(size: 12))
+            .foregroundStyle(hovering && enabled ? theme.textStrong : theme.textMid)
+            .padding(.vertical, 4)
+            .padding(.horizontal, 10)
+            .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(theme.chipBg))
+            .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(theme.hairline, lineWidth: 1))
+            .contentShape(Rectangle())
+            .opacity(enabled ? 1 : 0.4)
+            .onHover { hovering = $0 }
+            .onTapGesture { if enabled { action() } }
     }
 }
 

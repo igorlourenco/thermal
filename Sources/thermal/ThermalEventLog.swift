@@ -62,12 +62,7 @@ final class ThermalEventLog {
     // MARK: Init / persistence
 
     private static var fileURL: URL? {
-        guard let base = FileManager.default.urls(
-            for: .applicationSupportDirectory, in: .userDomainMask
-        ).first else { return nil }
-        let dir = base.appendingPathComponent("TempSensors", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("events.json")
+        thermalSupportDir()?.appendingPathComponent("events.json")
     }
 
     init() {

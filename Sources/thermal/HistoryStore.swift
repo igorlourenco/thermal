@@ -9,7 +9,7 @@ import Foundation
 //   MINUTE:  per-minute avg+max, persisted to disk, kept 7 days.
 //            -> powers the multi-day history charts.
 //
-// Persistence: JSON in ~/Library/Application Support/TempSensors/history.json
+// Persistence: JSON in ~/Library/Application Support/Thermal/history.json
 // Saved at most once per minute and on demand (call flush() on app quit).
 // API is a superset of v1 — record/peak/trend/history keep working.
 // =============================================================================
@@ -56,12 +56,7 @@ final class HistoryStore {
     // MARK: Init / persistence
 
     private static var fileURL: URL? {
-        guard let base = FileManager.default.urls(
-            for: .applicationSupportDirectory, in: .userDomainMask
-        ).first else { return nil }
-        let dir = base.appendingPathComponent("TempSensors", isDirectory: true)
-        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("history.json")
+        thermalSupportDir()?.appendingPathComponent("history.json")
     }
 
     init() {

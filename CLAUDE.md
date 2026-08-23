@@ -10,20 +10,29 @@ Swift Package Manager project. Temperature monitor for Apple Silicon Macs (M1–
 
 ```bash
 swift build                      # compile
-swift run tempsensors             # menu bar app (Ctrl-C or Quit to stop)
-swift run tempsensors --cli       # terminal dashboard, one snapshot
-swift run tempsensors --watch     # live terminal dashboard, 2s refresh
-swift run tempsensors --raw       # raw sensor list with group mapping (debugging)
-swift run tempsensors --watch --raw
+swift run thermal             # menu bar app (Ctrl-C or Quit to stop)
+swift run thermal --cli       # terminal dashboard, one snapshot
+swift run thermal --watch     # live terminal dashboard, 2s refresh
+swift run thermal --raw       # raw sensor list with group mapping (debugging)
+swift run thermal --watch --raw
 scripts/bundle.sh                 # release build -> dist/Thermal.app (ad-hoc signed)
 scripts/bundle.sh --debug --install   # debug bundle, copy to /Applications
+scripts/dmg.sh                    # dist/Thermal-<version>.dmg (drag-to-Applications)
+swift scripts/genassets.swift     # regenerate installer assets: Resources/*.icns + Resources/dmg/background.tiff
+scripts/appcast.sh                # regenerate Sparkle appcast.xml from DMGs in dist/updates/
+scripts/test-update.sh            # local end-to-end update demo (installs current, offers a patch bump); --cleanup undoes
+
 ```
+
+Distribution to other Macs needs Developer ID signing + notarization (`SIGN_IDENTITY` env var, then `notarytool`/`stapler` — see comments in `scripts/dmg.sh`); ad-hoc builds run locally only.
+
+Installer surfaces (icon, DMG, Gatekeeper, Sparkle update, removal) are specced in `installer.md`; `installer_prototype/` is the visual reference. All installer art is generated in code by `scripts/genassets.swift` — tweak values there, never re-export by hand. `dmg.sh` writes the Finder layout with `dmgbuild` (auto-installed into `.build/dmg-venv`), not AppleScript, so it runs headless.
 
 There is no test target in `Package.swift` — nothing to run via `swift test`. Verification is done by running `--raw` on real hardware and checking sensor names land in the right group (see "Verifying sensor mappings" below).
 
 ## Architecture
 
-Two targets: `CPrivateHID` (C shim) and `tempsensors` (executable, depends on `CPrivateHID`).
+Two targets: `CPrivateHID` (C shim) and `thermal` (executable, depends on `CPrivateHID`).
 
 ### Data flow
 
@@ -50,11 +59,11 @@ Swift can't call the private `IOHIDEventSystemClient` symbols directly or manage
 ### Verifying sensor mappings
 
 `SensorLabeler.classify`/`classifySMCKey` are pattern-based (prefix matching), not per-machine hardcoded tables — intentional, so new hardware degrades gracefully into "Other Sensors" instead of crashing or misreporting. When adding/adjusting a mapping:
-- Run `swift run tempsensors --raw` (or `--watch --raw`) to see every deduplicated sensor with its currently assigned group.
+- Run `swift run thermal --raw` (or `--watch --raw`) to see every deduplicated sensor with its currently assigned group.
 - To identify an unknown grid (`TD…`, `TRD…`, `TUD…`, `TPD…`), stress one component and watch which grid's values move in `--watch --raw`.
 - Comments in `SensorLabeler.swift` note mappings that were verified empirically on specific hardware (e.g. `TCMz` matching the hottest P-core exactly on M4 Pro) rather than from documentation — the private APIs here have none. Preserve/extend those provenance notes when changing classification.
 
-### UI layer (`Sources/tempsensors/UI/`)
+### UI layer (`Sources/thermal/UI/`)
 
 The menu bar app implements DESIGN.md — a complete visual spec (tokens, copy, states); `prototype/Thermal - 2a Complete.dc.html` is the pixel source of truth. Rules that matter when touching UI code:
 
