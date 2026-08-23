@@ -1,0 +1,73 @@
+// -----------------------------------------------------------------------------
+// BONUS: minimal SwiftUI menu bar app using SensorReader.
+//
+// This is NOT part of the SwiftPM CLI target. To use it:
+//   1. Create a new macOS App project in Xcode (SwiftUI lifecycle).
+//   2. Add SensorReader.swift + the CPrivateHID header (via a bridging header,
+//      or add this package as a local dependency).
+//   3. Replace the generated App file with this, set LSUIElement = YES in
+//      Info.plist to hide the Dock icon.
+// -----------------------------------------------------------------------------
+
+import SwiftUI
+
+@main
+struct TempMenuBarApp: App {
+    @StateObject private var model = TempModel()
+
+    var body: some Scene {
+        MenuBarExtra {
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(model.readings) { r in
+                    HStack {
+                        Text(r.name).font(.system(.caption, design: .monospaced))
+                        Spacer()
+                        Text(String(format: "%.1f °C", r.celsius))
+                            .foregroundStyle(color(for: r.celsius))
+                    }
+                }
+                Divider()
+                Button("Quit") { NSApplication.shared.terminate(nil) }
+            }
+            .padding(10)
+            .frame(width: 300)
+        } label: {
+            // The menu bar label — this is where your "fun" design starts.
+            Text(model.headline)
+                .monospacedDigit()
+        }
+        .menuBarExtraStyle(.window)
+    }
+
+    private func color(for celsius: Double) -> Color {
+        switch celsius {
+        case ..<55:  return .green
+        case ..<75:  return .orange
+        default:     return .red
+        }
+    }
+}
+
+@MainActor
+final class TempModel: ObservableObject {
+    @Published var readings: [TemperatureReading] = []
+    @Published var headline: String = "--"
+
+    private let reader = SensorReader()
+    private var timer: Timer?
+
+    init() {
+        refresh()
+        timer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.refresh() }
+        }
+    }
+
+    private func refresh() {
+        guard let reader else { return }
+        readings = reader.readAll()
+        if let hot = reader.hottest() {
+            headline = String(format: "%.0f°", hot.celsius)
+        }
+    }
+}
