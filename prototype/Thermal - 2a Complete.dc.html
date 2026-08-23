@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  body { margin:0; background:#0f0f11; }
+  a { color:#c9a25f; text-decoration:none; }
+  a:hover { color:#e0bd7c; }
+  @keyframes thpulse { 0%,100% { opacity:0.25; } 50% { opacity:0.9; } }
+  input { font-family:inherit; }
+  input:focus { outline:none; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; box-sizing:border-box; position:relative; font-family:-apple-system,'SF Pro Display','Helvetica Neue',Helvetica,sans-serif; padding:0 0 48px; display:flex; flex-direction:column; align-items:center; background:{{ stage }}; color:{{ textMid }};">
+
+  <div style="width:100%; height:28px; display:flex; align-items:center; justify-content:flex-end; gap:18px; padding:0 18px; box-sizing:border-box; background:{{ menubar }}; border-bottom:1px solid {{ hairline }};">
+    <div style="font-size:11px; color:{{ textDim }};">Wed 14:32</div>
+    <div onClick="{{ togglePopover }}" style="display:flex; align-items:center; gap:6px; padding:2px 6px; border-radius:5px; cursor:pointer;" style-hover="opacity:0.7;">
+      <sc-if value="{{ mbShowChip }}" hint-placeholder-val="{{ true }}">
+        <div style="width:13px; height:13px; border-radius:4px; border:1px solid {{ chipBorder }}; background:{{ chipFill }};"></div>
+      </sc-if>
+      <sc-if value="{{ mbShowNumber }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:12px; font-variant-numeric:tabular-nums; color:{{ menuText }};">{{ headlineValue }}</div>
+      </sc-if>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION -->
+  <sc-if value="{{ showNotif }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; top:38px; right:18px; width:344px; z-index:20; border-radius:14px; overflow:hidden; border:1px solid {{ hairline }}; background:{{ notifBg }}; box-shadow:0 18px 44px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07); backdrop-filter:blur(30px) saturate(160%); -webkit-backdrop-filter:blur(30px) saturate(160%);">
+      <div style="padding:13px 15px 12px; display:flex; gap:11px;">
+        <div style="width:26px; height:26px; border-radius:7px; flex:none; margin-top:1px; border:1px solid {{ chipBorder }}; background:{{ chipFill }};"></div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:baseline; gap:8px;">
+            <div style="font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:{{ textDim }};">Thermal</div>
+            <div style="font-size:10px; color:{{ textDim }};">now</div>
+          </div>
+          <div style="margin-top:5px; font-size:13.5px; line-height:1.35; color:{{ textStrong }};">{{ notifTitle }}</div>
+          <div style="margin-top:4px; font-size:12px; line-height:1.45; text-wrap:pretty; color:{{ textMid }};">{{ notifBody }}</div>
+        </div>
+        <div onClick="{{ dismissNotif }}" style="font-size:13px; line-height:1; padding:2px 2px; cursor:pointer; color:{{ textDim }};" style-hover="color:{{ textStrong }};">×</div>
+      </div>
+      <div style="display:flex; border-top:1px solid {{ rowBorder }};">
+        <div onClick="{{ notifShow }}" style="flex:1; text-align:center; padding:9px 0; font-size:11px; cursor:pointer; color:{{ textStrong }}; border-right:1px solid {{ rowBorder }};" style-hover="background:{{ hoverBg }};">Show details</div>
+        <div onClick="{{ dismissNotif }}" style="flex:1; text-align:center; padding:9px 0; font-size:11px; cursor:pointer; color:{{ textMid }};" style-hover="background:{{ hoverBg }};">Snooze 1 hour</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showPopover }}" hint-placeholder-val="{{ true }}">
+    <div style="width:360px; height:520px; margin-top:14px; border-radius:16px; box-shadow:0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06); overflow:hidden; position:relative; border:1px solid {{ hairline }}; background:{{ substrate }};">
+      <div style="position:absolute; top:-70px; left:-30px; width:340px; height:270px; border-radius:50%; filter:blur(28px); background:{{ bloomWarm }};"></div>
+      <div style="position:absolute; bottom:-90px; right:-50px; width:300px; height:240px; border-radius:50%; filter:blur(30px); background:{{ bloomCool }};"></div>
+
+      <div style="position:relative; height:100%; box-sizing:border-box; display:flex; flex-direction:column;">
+
+        <sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+          <div style="padding:18px 20px 0; display:flex; align-items:center; justify-content:space-between; min-height:18px;">
+            <div onClick="{{ goMain }}" style="font-size:10px; letter-spacing:0.2em; text-transform:uppercase; cursor:pointer; color:{{ textDim }};" style-hover="opacity:0.7;">{{ headerLeft }}</div>
+            <div style="font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:{{ textDim }};">{{ headerRight }}</div>
+          </div>
+        </sc-if>
+
+        <!-- ONBOARDING -->
+        <sc-if value="{{ isOnboard }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; display:flex; flex-direction:column; padding:26px 24px 22px;">
+
+            <sc-if value="{{ obStep0 }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:1; display:flex; flex-direction:column;">
+                <div style="width:46px; height:46px; border-radius:13px; border:1px solid {{ chipBorder }}; background:{{ chipFill }};"></div>
+                <div style="margin-top:auto;">
+                  <div style="font-size:26px; font-weight:200; letter-spacing:-0.02em; color:{{ textStrong }};">Thermal</div>
+                  <div style="margin-top:12px; font-size:13.5px; line-height:1.55; text-wrap:pretty; color:{{ textMid }};">Your Mac measures its own temperature in about forty places. Thermal reads those numbers and tells you what they mean.</div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ obStep1 }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1; display:flex; flex-direction:column;">
+                <div style="font-size:21px; font-weight:200; line-height:1.3; text-wrap:pretty; color:{{ textStrong }};">Allow sensor access</div>
+                <div style="margin-top:10px; font-size:12.5px; line-height:1.5; text-wrap:pretty; color:{{ textMid }};">macOS keeps sensor readings behind a permission. Thermal needs it to show anything at all.</div>
+                <div style="margin-top:18px; border-radius:12px; padding:2px 14px; border:1px solid {{ hairline }}; background:{{ glass }}; box-shadow:{{ inset }};">
+                  <div style="display:flex; gap:11px; padding:11px 0; border-bottom:1px solid {{ rowBorder }};">
+                    <div style="font-size:10px; letter-spacing:0.16em; text-transform:uppercase; width:52px; color:{{ textDim }};">Reads</div>
+                    <div style="flex:1; font-size:12px; line-height:1.4; color:{{ textStrong }};">Temperatures, fan speed, power draw</div>
+                  </div>
+                  <div style="display:flex; gap:11px; padding:11px 0;">
+                    <div style="font-size:10px; letter-spacing:0.16em; text-transform:uppercase; width:52px; color:{{ textDim }};">Never</div>
+                    <div style="flex:1; font-size:12px; line-height:1.4; color:{{ textMid }};">Files, network, screen, keystrokes</div>
+                  </div>
+                </div>
+                <div style="margin-top:14px; font-size:11px; line-height:1.5; color:{{ textDim }};">Readings stay on this Mac. Thermal has no network access.</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ obStep2 }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1; display:flex; flex-direction:column;">
+                <div style="font-size:21px; font-weight:200; line-height:1.3; text-wrap:pretty; color:{{ textStrong }};">How it should look up there</div>
+                <div style="margin-top:9px; font-size:12.5px; line-height:1.5; color:{{ textMid }};">You can change this any time in Settings.</div>
+                <div style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+                  <sc-for list="{{ mbOptions }}" as="o" hint-placeholder-count="3">
+                    <div onClick="{{ o.pick }}" style="display:flex; align-items:center; gap:12px; border-radius:10px; padding:11px 13px; cursor:pointer; border:1px solid {{ o.border }}; background:{{ o.bg }};" style-hover="background:{{ hoverBg }};">
+                      <div style="width:74px; display:flex; align-items:center; gap:5px; padding:3px 6px; border-radius:5px; background:{{ menubar }};">
+                        <sc-if value="{{ o.chip }}" hint-placeholder-val="{{ true }}">
+                          <div style="width:11px; height:11px; border-radius:3px; border:1px solid {{ chipBorder }}; background:{{ chipFill }};"></div>
+                        </sc-if>
+                        <sc-if value="{{ o.number }}" hint-placeholder-val="{{ true }}">
+                          <div style="font-size:11px; font-variant-numeric:tabular-nums; color:{{ menuText }};">{{ headlineValue }}</div>
+                        </sc-if>
+                      </div>
+                      <div style="flex:1;">
+                        <div style="font-size:12.5px; color:{{ textStrong }};">{{ o.label }}</div>
+                        <div style="font-size:10.5px; margin-top:2px; color:{{ textDim }};">{{ o.note }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <div style="display:flex; align-items:center; gap:10px; padding-top:20px;">
+              <div onClick="{{ obNext }}" style="font-size:11px; letter-spacing:0.12em; text-transform:uppercase; border-radius:8px; padding:9px 16px; cursor:pointer; color:{{ primaryText }}; background:{{ primaryBg }}; border:1px solid {{ primaryBorder }};" style-hover="opacity:0.85;">{{ obPrimary }}</div>
+              <sc-if value="{{ obHasSecondary }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ obDeny }}" style="font-size:11px; letter-spacing:0.12em; text-transform:uppercase; padding:9px 8px; cursor:pointer; color:{{ textDim }};" style-hover="color:{{ textMid }};">Not now</div>
+              </sc-if>
+              <div style="flex:1;"></div>
+              <div style="display:flex; gap:5px;">
+                <sc-for list="{{ obDots }}" as="d" hint-placeholder-count="3">
+                  <div style="width:5px; height:5px; border-radius:50%; background:{{ d.bg }};"></div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- DENIED -->
+        <sc-if value="{{ isDenied }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; display:flex; flex-direction:column;">
+            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding:0 22px;">
+              <div style="width:44px; height:44px; border-radius:12px; margin-bottom:16px; border:1px solid {{ hairline }}; background:{{ glassSoft }};"></div>
+              <div style="font-size:19px; font-weight:200; line-height:1.35; text-wrap:pretty; color:{{ textStrong }};">Thermal has nothing to show yet.</div>
+              <div style="margin-top:9px; font-size:12.5px; line-height:1.5; text-wrap:pretty; color:{{ textMid }};">Without sensor access there are no temperatures to read. You can grant it here, or later in System Settings › Privacy &amp; Security.</div>
+            </div>
+            <div style="padding:0 20px 20px; display:flex; gap:8px;">
+              <div onClick="{{ obAllow }}" style="font-size:11px; letter-spacing:0.12em; text-transform:uppercase; border-radius:8px; padding:9px 16px; cursor:pointer; color:{{ primaryText }}; background:{{ primaryBg }}; border:1px solid {{ primaryBorder }};" style-hover="opacity:0.85;">Allow access</div>
+              <div onClick="{{ quitApp }}" style="font-size:11px; letter-spacing:0.12em; text-transform:uppercase; padding:9px 8px; cursor:pointer; color:{{ textDim }};" style-hover="color:{{ textMid }};">Quit Thermal</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- CONNECTING -->
+        <sc-if value="{{ isConnecting }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding:0 22px;">
+            <div style="display:flex; gap:6px; margin-bottom:20px;">
+              <div style="width:7px; height:7px; border-radius:50%; background:{{ textMid }}; animation:thpulse 1.3s ease-in-out infinite;"></div>
+              <div style="width:7px; height:7px; border-radius:50%; background:{{ textMid }}; animation:thpulse 1.3s ease-in-out 0.18s infinite;"></div>
+              <div style="width:7px; height:7px; border-radius:50%; background:{{ textMid }}; animation:thpulse 1.3s ease-in-out 0.36s infinite;"></div>
+            </div>
+            <div style="font-size:19px; font-weight:200; line-height:1.35; color:{{ textStrong }};">Reading sensors…</div>
+            <div style="margin-top:9px; font-size:12.5px; line-height:1.5; text-wrap:pretty; color:{{ textMid }};">First readings take a few seconds. Thermal is finding out which sensors your Mac has.</div>
+          </div>
+        </sc-if>
+
+        <!-- MAIN -->
+        <sc-if value="{{ isMain }}" hint-placeholder-val="{{ true }}">
+          <div style="flex:1; display:flex; flex-direction:column;">
+            <div style="padding:20px 20px 16px;">
+              <div style="display:flex; align-items:flex-start; gap:6px;">
+                <div style="font-size:72px; font-weight:200; letter-spacing:-0.05em; line-height:0.9; font-variant-numeric:tabular-nums; color:{{ textStrong }}; text-shadow:{{ numberGlow }};">{{ headlineNumber }}</div>
+                <div onClick="{{ toggleUnit }}" style="margin-top:10px; font-size:16px; font-weight:300; border-radius:6px; padding:3px 6px; cursor:pointer; color:{{ textDim }}; background:{{ chipBg }}; border:1px solid {{ hairline }};" style-hover="color:{{ textStrong }};">{{ unitLabel }}</div>
+              </div>
+              <div style="margin-top:10px; font-size:14px; line-height:1.4; text-wrap:pretty; color:{{ textMid }};">{{ sentence }}</div>
+            </div>
+
+            <sc-if value="{{ throttling }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ goEvents }}" style="margin:0 14px 12px; border-radius:10px; padding:11px 14px; display:flex; align-items:center; gap:10px; cursor:pointer; border:1px solid oklch(0.65 0.19 30 / 0.42); background:oklch(0.65 0.19 30 / 0.12); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);" style-hover="background:oklch(0.65 0.19 30 / 0.18);">
+                <div style="width:6px; height:6px; border-radius:50%; background:oklch(0.65 0.19 30); box-shadow:0 0 10px oklch(0.65 0.19 30 / 0.7);"></div>
+                <div style="flex:1; font-size:12.5px; line-height:1.4; color:{{ textStrong }};">macOS is slowing things down to stay cool.</div>
+                <div style="font-size:12px; color:{{ textDim }};">→</div>
+              </div>
+            </sc-if>
+
+            <div style="margin:0 14px; border-radius:12px; overflow:hidden; border:1px solid {{ hairline }}; background:{{ glass }}; box-shadow:{{ inset }}; backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%);">
+              <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+                <div onClick="{{ r.open }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; cursor:pointer; border-bottom:1px solid {{ rowBorder }};" style-hover="background:{{ hoverBg }};">
+                  <div style="width:6px; height:6px; border-radius:50%; background:{{ r.color }}; box-shadow:{{ r.glow }};"></div>
+                  <div style="flex:1; font-size:12.5px; color:{{ r.labelColor }};">{{ r.label }}</div>
+                  <div style="font-size:13px; font-variant-numeric:tabular-nums; color:{{ r.valueColor }};">{{ r.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="flex:1;"></div>
+
+            <div style="margin:12px 14px 14px; display:flex; gap:8px;">
+              <div onClick="{{ goWhy }}" style="flex:1; border-radius:10px; padding:11px 14px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; border:1px solid {{ hairline }}; background:{{ glassSoft }}; backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);" style-hover="background:{{ hoverBg }};">
+                <div style="font-size:12px; color:{{ textMid }};">{{ whyLinkLabel }}</div>
+                <div style="font-size:12px; color:{{ textDim }};">→</div>
+              </div>
+              <div onClick="{{ goSensors }}" style="border-radius:10px; padding:11px 14px; display:flex; align-items:center; gap:8px; cursor:pointer; border:1px solid {{ hairline }}; background:{{ glassSoft }}; backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);" style-hover="background:{{ hoverBg }};">
+                <div style="font-size:12px; color:{{ textMid }};">All sensors</div>
+                <div style="font-size:12px; color:{{ textDim }};">→</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- WHY -->
+        <sc-if value="{{ isWhy }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; display:flex; flex-direction:column;">
+            <div style="padding:16px 20px 14px;">
+              <div style="font-size:19px; font-weight:300; line-height:1.35; text-wrap:pretty; color:{{ textStrong }};">{{ whyTitle }}</div>
+              <div style="margin-top:8px; font-size:12.5px; line-height:1.5; color:{{ textDim }};">{{ whySub }}</div>
+            </div>
+            <sc-if value="{{ hasProcesses }}" hint-placeholder-val="{{ true }}">
+              <div style="margin:0 14px; border-radius:12px; overflow:hidden; border:1px solid {{ hairline }}; background:{{ glass }}; box-shadow:{{ inset }}; backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%);">
+                <sc-for list="{{ processes }}" as="p" hint-placeholder-count="4">
+                  <div style="display:flex; align-items:center; gap:11px; padding:11px 13px; border-bottom:1px solid {{ rowBorder }};">
+                    <div style="width:22px; height:22px; border-radius:6px; background:{{ chipBg }}; border:1px solid {{ hairline }};"></div>
+                    <div style="flex:1;">
+                      <div style="font-size:12.5px; color:{{ textStrong }};">{{ p.name }}</div>
+                      <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; margin-top:3px; color:{{ textDim }};">{{ p.note }}</div>
+                    </div>
+                    <div style="font-size:12.5px; font-variant-numeric:tabular-nums; color:{{ p.color }};">{{ p.cpu }}</div>
+                    <div onClick="{{ p.quit }}" style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; border-radius:5px; padding:3px 7px; cursor:pointer; color:{{ textMid }}; border:1px solid {{ hairline }}; background:{{ chipBg }};" style-hover="color:{{ textStrong }};">Quit</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noProcesses }}" hint-placeholder-val="{{ false }}">
+              <div style="margin:0 14px; border-radius:12px; padding:26px 18px; text-align:center; border:1px dashed {{ hairline }}; background:{{ glassSoft }};">
+                <div style="font-size:13px; line-height:1.45; color:{{ textStrong }};">Nothing is working hard.</div>
+                <div style="margin-top:6px; font-size:11.5px; line-height:1.5; text-wrap:pretty; color:{{ textDim }};">No process is using more than 5% of the CPU. Any warmth you see now is left over heat.</div>
+              </div>
+            </sc-if>
+            <div style="flex:1;"></div>
+            <div style="padding:0 20px 16px; font-size:11px; color:{{ textDim }};">{{ whyFooter }}</div>
+          </div>
+        </sc-if>
+
+        <!-- ALL SENSORS -->
+        <sc-if value="{{ isSensors }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; display:flex; flex-direction:column; min-height:0;">
+            <div style="padding:14px 14px 12px;">
+              <input type="text" value="{{ query }}" onChange="{{ onQuery }}" placeholder="Search sensors" style="width:100%; box-sizing:border-box; font-size:12.5px; padding:8px 11px; border-radius:9px; color:{{ textStrong }}; background:{{ chipBg }}; border:1px solid {{ hairline }};" />
+            </div>
+            <div style="flex:1; min-height:0; overflow-y:auto; margin:0 14px 14px; border-radius:12px; border:1px solid {{ hairline }}; background:{{ glass }}; box-shadow:{{ inset }}; backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%);">
+              <sc-for list="{{ allRows }}" as="r" hint-placeholder-count="8">
+                <div onClick="{{ r.open }}" style="display:flex; align-items:center; gap:10px; padding:10px 14px; cursor:pointer; border-bottom:1px solid {{ rowBorder }};" style-hover="background:{{ hoverBg }};">
+                  <div style="width:6px; height:6px; border-radius:50%; background:{{ r.color }};"></div>
+                  <div style="flex:1;">
+                    <div style="font-size:12.5px; color:{{ textStrong }};">{{ r.label }}</div>
+                    <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; margin-top:3px; color:{{ textDim }};">{{ r.meta }}</div>
+                  </div>
+                  <div style="font-size:13px; font-variant-numeric:tabular-nums; color:{{ textMid }};">{{ r.value }}</div>
+                </div>
+              </sc-for>
+              <sc-if value="{{ noMatches }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:24px 16px; text-align:center; font-size:12px; color:{{ textDim }};">No sensor matches that.</div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- DETAIL -->
+        <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; display:flex; flex-direction:column;">
+            <div style="padding:18px 20px 14px; display:flex; align-items:flex-end; justify-content:space-between;">
+              <div style="display:flex; align-items:flex-start; gap:5px;">
+                <div style="font-size:58px; font-weight:200; letter-spacing:-0.05em; line-height:0.9; font-variant-numeric:tabular-nums; color:{{ textStrong }}; text-shadow:{{ detailGlow }};">{{ detailNumber }}</div>
+                <div onClick="{{ toggleUnit }}" style="margin-top:8px; font-size:14px; font-weight:300; border-radius:5px; padding:2px 5px; cursor:pointer; color:{{ textDim }}; background:{{ chipBg }}; border:1px solid {{ hairline }};" style-hover="color:{{ textStrong }};">{{ unitLabel }}</div>
+              </div>
+              <div style="text-align:right; padding-bottom:6px;">
+                <div style="font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; color:{{ textDim }};">Session peak</div>
+                <div style="font-size:18px; font-weight:200; font-variant-numeric:tabular-nums; margin-top:3px; color:{{ textMid }};">{{ detailPeakValue }}</div>
+              </div>
+            </div>
+            <div style="padding:0 20px 14px; font-size:12.5px; line-height:1.5; text-wrap:pretty; color:{{ textMid }};">{{ detailExplain }}</div>
+            <div style="margin:0 14px 12px; border-radius:12px; padding:12px 14px; border:1px solid {{ hairline }}; background:{{ glass }}; box-shadow:{{ inset }}; backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);">
+              <div style="display:flex; justify-content:space-between; font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; margin-bottom:8px; color:{{ textDim }};"><div>24 hours</div><div style="color:{{ readoutColor }};">{{ detailAnnotation }}</div></div>
+              <sc-if value="{{ hasHistory }}" hint-placeholder-val="{{ true }}">
+                <div onMouseMove="{{ onScrub }}" onMouseLeave="{{ endScrub }}" style="cursor:crosshair;">
+                  <svg width="100%" height="76" viewBox="0 0 300 76" preserveAspectRatio="none">
+                    <polyline points="{{ detailChart }}" fill="none" stroke="{{ detailColor }}" stroke-width="1.3"></polyline>
+                    <line x1="{{ cursorX }}" y1="4" x2="{{ cursorX }}" y2="76" stroke="{{ crosshair }}"></line>
+                    <circle cx="{{ cursorX }}" cy="{{ cursorY }}" r="2.6" fill="{{ detailColor }}"></circle>
+                  </svg>
+                </div>
+              </sc-if>
+              <sc-if value="{{ noHistory }}" hint-placeholder-val="{{ false }}">
+                <div style="height:76px; display:flex; align-items:center; justify-content:center; font-size:11.5px; text-align:center; line-height:1.5; color:{{ textDim }};">Not enough history yet.<br />This chart fills in over the first hour.</div>
+              </sc-if>
+            </div>
+            <div style="flex:1; margin:0 14px 14px; border-radius:12px; padding:10px 14px; overflow:hidden; border:1px solid {{ hairline }}; background:{{ glassSoft }}; backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);">
+              <div style="font-size:9.5px; letter-spacing:0.2em; text-transform:uppercase; padding-bottom:7px; color:{{ textDim }}; border-bottom:1px solid {{ rowBorder }};">Raw sensors</div>
+              <sc-for list="{{ detailSensors }}" as="s" hint-placeholder-count="4">
+                <div style="display:flex; justify-content:space-between; padding:6px 0; font-size:11px; font-family:ui-monospace,'SF Mono',Menlo,monospace; color:{{ textDim }};">
+                  <div>{{ s.id }}</div>
+                  <div style="color:{{ textMid }};">{{ s.val }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- HISTORY -->
+        <sc-if value="{{ isHistory }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; display:flex; flex-direction:column;">
+            <div style="padding:14px 20px 12px; display:flex; align-items:center; justify-content:space-between;">
+              <div style="font-size:12.5px; color:{{ textMid }};">{{ historySub }}</div>
+              <div style="display:flex; gap:3px; border-radius:7px; padding:2px; border:1px solid {{ hairline }}; background:{{ chipBg }};">
+                <sc-for list="{{ ranges }}" as="rg" hint-placeholder-count="3">
+                  <div onClick="{{ rg.pick }}" style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; padding:3px 9px; border-radius:5px; cursor:pointer; color:{{ rg.color }}; background:{{ rg.bg }};" style-hover="opacity:0.8;">{{ rg.label }}</div>
+                </sc-for>
+              </div>
+            </div>
+
+            <sc-if value="{{ noHistory }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1; margin:0 14px 14px; border-radius:12px; display:flex; flex-direction:column; justify-content:center; padding:0 22px; text-align:center; border:1px dashed {{ hairline }}; background:{{ glassSoft }};">
+                <div style="font-size:15px; font-weight:300; line-height:1.4; color:{{ textStrong }};">Nothing recorded yet.</div>
+                <div style="margin-top:9px; font-size:12px; line-height:1.55; text-wrap:pretty; color:{{ textDim }};">Thermal keeps 30 days of readings on this Mac. The first charts appear after about an hour of use.</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ hasHistory }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:1; margin:0 14px 14px; border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:12px; border:1px solid {{ hairline }}; background:{{ glass }}; box-shadow:{{ inset }}; backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%);">
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; margin-bottom:5px; color:{{ textMid }};"><div>CPU — Performance</div><div style="color:{{ textDim }};">peak {{ pkPcore }}</div></div>
+                  <svg width="100%" height="60" viewBox="0 0 300 60" preserveAspectRatio="none">
+                    <polyline points="{{ histPcore }}" fill="none" stroke="{{ cPcore }}" stroke-width="1.3"></polyline>
+                    <circle cx="{{ histPcoreDotX }}" cy="{{ histPcoreDotY }}" r="2.6" fill="{{ cPcore }}"></circle>
+                  </svg>
+                  <div style="position:relative; height:13px;"><div style="position:absolute; left:{{ annPcoreLeft }}; font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:{{ annotation }};">{{ annPcore }}</div></div>
+                </div>
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; margin-bottom:5px; color:{{ textMid }};"><div>Graphics (GPU)</div><div style="color:{{ textDim }};">peak {{ pkGpu }}</div></div>
+                  <svg width="100%" height="48" viewBox="0 0 300 48" preserveAspectRatio="none"><polyline points="{{ histGpu }}" fill="none" stroke="{{ neutralLine }}" stroke-width="1.2"></polyline><circle cx="{{ histGpuDotX }}" cy="{{ histGpuDotY }}" r="2.4" fill="{{ neutralDot }}"></circle></svg>
+                  <div style="position:relative; height:13px;"><div style="position:absolute; left:{{ annGpuLeft }}; font-size:9px; letter-spacing:0.14em; text-transform:uppercase; color:{{ textDim }};">{{ annGpu }}</div></div>
+                </div>
+                <div>
+                  <div style="display:flex; justify-content:space-between; font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; margin-bottom:5px; color:{{ textMid }};"><div>Chassis &amp; airflow</div><div style="color:{{ textDim }};">now {{ vChassis }}</div></div>
+                  <svg width="100%" height="34" viewBox="0 0 300 34" preserveAspectRatio="none"><polyline points="{{ histChassis }}" fill="none" stroke="{{ neutralLineSoft }}" stroke-width="1.2"></polyline></svg>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; padding-top:8px; color:{{ textDim }}; border-top:1px solid {{ rowBorder }};">
+                  <sc-for list="{{ axis }}" as="a" hint-placeholder-count="5">
+                    <div>{{ a.label }}</div>
+                  </sc-for>
+                </div>
+                <div onClick="{{ goEvents }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer; padding-top:4px;" style-hover="opacity:0.7;">
+                  <div style="font-size:11.5px; color:{{ textMid }};">{{ eventsLink }}</div>
+                  <div style="font-size:11.5px; color:{{ textDim }};">→</div>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- EVENT LOG -->
+        <sc-if value="{{ isEvents }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; display:flex; flex-direction:column; min-height:0;">
+            <sc-if value="{{ hasHistory }}" hint-placeholder-val="{{ true }}">
+              <div style="padding:15px 20px 13px;">
+                <div style="font-size:18px; font-weight:200; line-height:1.35; text-wrap:pretty; color:{{ textStrong }};">{{ eventsTitle }}</div>
+                <div style="margin-top:7px; font-size:12px; line-height:1.5; color:{{ textDim }};">{{ eventsSub }}</div>
+              </div>
+              <div style="flex:1; min-height:0; overflow-y:auto; margin:0 14px 14px; border-radius:12px; border:1px solid {{ hairline }}; background:{{ glass }}; box-shadow:{{ inset }}; backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%);">
+                <sc-for list="{{ events }}" as="e" hint-placeholder-count="5">
+                  <div style="padding:11px 14px; border-bottom:1px solid {{ rowBorder }};">
+                    <div style="display:flex; align-items:baseline; gap:10px;">
+                      <div style="width:6px; height:6px; border-radius:50%; flex:none; background:{{ e.dot }};"></div>
+                      <div style="flex:1; font-size:12.5px; color:{{ textStrong }};">{{ e.when }}</div>
+                      <div style="font-size:12.5px; font-variant-numeric:tabular-nums; color:{{ e.peakColor }};">{{ e.peak }}</div>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:4px; padding-left:16px; font-size:10.5px; color:{{ textDim }};">
+                      <div>{{ e.dur }}</div>
+                      <div>·</div>
+                      <div>{{ e.cause }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ noHistory }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding:0 24px; text-align:center;">
+                <div style="font-size:16px; font-weight:300; line-height:1.4; color:{{ textStrong }};">No throttling so far.</div>
+                <div style="margin-top:9px; font-size:12px; line-height:1.55; text-wrap:pretty; color:{{ textDim }};">When macOS slows your Mac down to cool it, the event lands here with what caused it.</div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- FANS -->
+        <sc-if value="{{ isFans }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; display:flex; flex-direction:column;">
+            <sc-if value="{{ fanless }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding:0 20px;">
+                <div style="font-size:19px; font-weight:200; line-height:1.35; color:{{ textStrong }};">No fans — your Mac cools silently.</div>
+                <div style="margin-top:10px; font-size:12.5px; line-height:1.5; text-wrap:pretty; color:{{ textMid }};">The Air moves heat through its chassis. Under long loads it will slow itself down instead of getting louder.</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ hasFans }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:1; display:flex; flex-direction:column;">
+                <div style="margin:16px 14px 0; display:flex; gap:10px;">
+                  <div style="flex:1; border-radius:11px; padding:12px 14px; border:1px solid {{ hairline }}; background:{{ glass }}; box-shadow:{{ inset }}; backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);">
+                    <div style="font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; color:{{ textDim }};">Left</div>
+                    <div style="margin-top:6px; font-size:26px; font-weight:200; font-variant-numeric:tabular-nums; color:{{ textStrong }};">{{ fanLeft }}</div>
+                    <div style="margin-top:10px; height:2px; border-radius:1px; background:{{ rail }};"><div style="height:2px; border-radius:1px; width:{{ fanPctL }}; background:{{ headlineColor }};"></div></div>
+                  </div>
+                  <div style="flex:1; border-radius:11px; padding:12px 14px; border:1px solid {{ hairline }}; background:{{ glass }}; box-shadow:{{ inset }}; backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);">
+                    <div style="font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; color:{{ textDim }};">Right</div>
+                    <div style="margin-top:6px; font-size:26px; font-weight:200; font-variant-numeric:tabular-nums; color:{{ textStrong }};">{{ fanRight }}</div>
+                    <div style="margin-top:10px; height:2px; border-radius:1px; background:{{ rail }};"><div style="height:2px; border-radius:1px; width:{{ fanPctR }}; background:{{ headlineColor }};"></div></div>
+                  </div>
+                </div>
+                <div style="padding:12px 20px 0; display:flex; justify-content:space-between; font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; color:{{ textDim }};"><div>Idle 1 200</div><div>Max 5 400</div></div>
+                <div style="margin:16px 14px 0; border-radius:12px; padding:12px 14px; border:1px solid {{ hairline }}; background:{{ glass }}; box-shadow:{{ inset }};">
+                  <div style="font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; color:{{ textDim }};">Last 24 hours</div>
+                  <svg width="100%" height="42" viewBox="0 0 300 42" preserveAspectRatio="none" style="margin-top:8px;"><polyline points="{{ fanChart }}" fill="none" stroke="{{ neutralLine }}" stroke-width="1.2"></polyline></svg>
+                </div>
+                <div style="flex:1;"></div>
+                <div style="padding:0 20px 18px; font-size:12.5px; color:{{ textMid }};">{{ fanNote }}</div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <!-- SETTINGS -->
+        <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; display:flex; flex-direction:column; padding:14px 14px 14px; min-height:0;">
+            <div style="border-radius:12px; padding:2px 16px; border:1px solid {{ hairline }}; background:{{ glass }}; box-shadow:{{ inset }}; backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);">
+              <div style="display:flex; align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid {{ rowBorder }};">
+                <div style="flex:1; font-size:13px; color:{{ textStrong }};">Units</div>
+                <div style="display:flex; gap:3px; border-radius:6px; padding:2px; border:1px solid {{ hairline }}; background:{{ chipBg }};">
+                  <div onClick="{{ setCelsius }}" style="font-size:11px; padding:3px 11px; border-radius:4px; cursor:pointer; color:{{ textStrong }}; background:{{ bgCelsius }};">°C</div>
+                  <div onClick="{{ setFahrenheit }}" style="font-size:11px; padding:3px 11px; border-radius:4px; cursor:pointer; color:{{ textStrong }}; background:{{ bgFahrenheit }};">°F</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid {{ rowBorder }};">
+                <div style="flex:1; font-size:13px; color:{{ textStrong }};">Appearance</div>
+                <div style="display:flex; gap:3px; border-radius:6px; padding:2px; border:1px solid {{ hairline }}; background:{{ chipBg }};">
+                  <div onClick="{{ setLight }}" style="font-size:11px; padding:3px 11px; border-radius:4px; cursor:pointer; color:{{ textStrong }}; background:{{ bgLight }};">Light</div>
+                  <div onClick="{{ setDark }}" style="font-size:11px; padding:3px 11px; border-radius:4px; cursor:pointer; color:{{ textStrong }}; background:{{ bgDark }};">Dark</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid {{ rowBorder }}; position:relative;">
+                <div style="flex:1; font-size:13px; color:{{ textStrong }};">Menu bar style</div>
+                <div onClick="{{ toggleMbMenu }}" style="font-size:12px; border-radius:6px; padding:4px 10px; cursor:pointer; color:{{ textMid }}; border:1px solid {{ hairline }}; background:{{ chipBg }};" style-hover="color:{{ textStrong }};">{{ mbLabel }} ⌄</div>
+                <sc-if value="{{ mbMenuOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="position:absolute; right:0; top:38px; z-index:5; width:184px; border-radius:9px; overflow:hidden; border:1px solid {{ hairline }}; background:{{ menuPanel }}; box-shadow:0 12px 30px rgba(0,0,0,0.35);">
+                    <sc-for list="{{ mbOptions }}" as="o" hint-placeholder-count="3">
+                      <div onClick="{{ o.pick }}" style="display:flex; align-items:center; gap:8px; padding:8px 11px; cursor:pointer; border-bottom:1px solid {{ rowBorder }}; background:{{ o.bg }};" style-hover="background:{{ hoverBg }};">
+                        <div style="flex:1; font-size:12px; color:{{ textStrong }};">{{ o.label }}</div>
+                        <div style="font-size:11px; color:{{ textDim }};">{{ o.check }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+              <div style="display:flex; align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid {{ rowBorder }};">
+                <div style="flex:1; font-size:13px; color:{{ textStrong }};">Refresh</div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div onClick="{{ setRefresh }}" style="width:100px; height:3px; border-radius:2px; position:relative; cursor:pointer; background:{{ rail }};">
+                    <div style="width:{{ refreshPct }}; height:3px; border-radius:2px; background:{{ textMid }};"></div>
+                    <div style="position:absolute; left:{{ refreshPct }}; top:-5px; margin-left:-6px; width:13px; height:13px; border-radius:50%; background:{{ knob }}; box-shadow:0 1px 3px rgba(0,0,0,0.4);"></div>
+                  </div>
+                  <div style="font-size:12px; font-variant-numeric:tabular-nums; width:30px; color:{{ textMid }};">{{ refreshLabel }}</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:14px; padding:11px 0; border-bottom:1px solid {{ rowBorder }};">
+                <div style="flex:1; font-size:13px; color:{{ textStrong }};">Launch at login</div>
+                <div onClick="{{ toggleLaunch }}" style="width:38px; height:22px; border-radius:11px; position:relative; cursor:pointer; background:{{ launchBg }};">
+                  <div style="position:absolute; left:{{ launchKnobLeft }}; top:2px; width:18px; height:18px; border-radius:50%; background:{{ knob }};"></div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:14px; padding:11px 0;">
+                <div style="flex:1;">
+                  <div style="font-size:13px; color:{{ textStrong }};">Notify above</div>
+                  <div style="font-size:11px; margin-top:3px; color:{{ textDim }};">Only for sustained highs, never for spikes</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:2px; border-radius:6px; padding:2px; border:1px solid {{ hairline }}; background:{{ chipBg }};">
+                  <div onClick="{{ thresholdDown }}" style="font-size:13px; line-height:1; padding:4px 8px; border-radius:4px; cursor:pointer; color:{{ textMid }};" style-hover="background:{{ hoverBg }};">−</div>
+                  <div style="font-size:13px; font-variant-numeric:tabular-nums; min-width:34px; text-align:center; color:{{ textStrong }};">{{ threshold }}</div>
+                  <div onClick="{{ thresholdUp }}" style="font-size:13px; line-height:1; padding:4px 8px; border-radius:4px; cursor:pointer; color:{{ textMid }};" style-hover="background:{{ hoverBg }};">+</div>
+                </div>
+              </div>
+            </div>
+            <div style="flex:1;"></div>
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 6px 0;">
+              <div onClick="{{ goConnecting }}" style="font-size:11px; cursor:pointer; color:{{ textDim }};" style-hover="color:{{ textMid }};">Sensor service · reconnect</div>
+              <div onClick="{{ goOnboard }}" style="font-size:11px; cursor:pointer; color:{{ textDim }};" style-hover="color:{{ textMid }};">Replay setup</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ERROR -->
+        <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; display:flex; flex-direction:column;">
+            <div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding:0 20px;">
+              <div style="width:44px; height:44px; border-radius:12px; margin-bottom:16px; border:1px solid {{ hairline }}; background:{{ glassSoft }};"></div>
+              <div style="font-size:18px; font-weight:200; line-height:1.35; text-wrap:pretty; color:{{ textStrong }};">We can't read the sensors right now.</div>
+              <div style="margin-top:9px; font-size:12.5px; line-height:1.5; text-wrap:pretty; color:{{ textMid }};">Nothing is wrong with your Mac — the app lost its connection to the sensor service.</div>
+            </div>
+            <div style="padding:0 14px 16px; display:flex; gap:8px;">
+              <div onClick="{{ goConnecting }}" style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; border-radius:7px; padding:7px 12px; cursor:pointer; color:{{ textStrong }}; border:1px solid {{ hairline }}; background:{{ chipBg }};" style-hover="background:{{ hoverBg }};">Try again</div>
+              <div style="font-size:10px; letter-spacing:0.1em; text-transform:uppercase; padding:7px 8px; color:{{ textDim }};">Contact support</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showFooter }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:9px 16px; border-top:1px solid {{ hairline }}; background:{{ glassSoft }};">
+            <div onClick="{{ goMain }}" style="font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; color:{{ navMain }};" style-hover="opacity:0.7;">Now</div>
+            <div onClick="{{ goHistory }}" style="font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; color:{{ navHistory }};" style-hover="opacity:0.7;">History</div>
+            <div onClick="{{ goFans }}" style="font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; color:{{ navFans }};" style-hover="opacity:0.7;">Fans</div>
+            <div onClick="{{ goZen }}" style="font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; color:{{ textDim }};" style-hover="opacity:0.7;">Zen</div>
+            <div onClick="{{ goSettings }}" style="font-size:9.5px; letter-spacing:0.14em; text-transform:uppercase; cursor:pointer; color:{{ navSettings }};" style-hover="opacity:0.7;">Settings</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ZEN -->
+  <sc-if value="{{ isZen }}" hint-placeholder-val="{{ false }}">
+    <div style="width:660px; height:420px; margin-top:14px; border-radius:18px; box-shadow:0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05); overflow:hidden; position:relative; border:1px solid {{ hairline }}; background:{{ substrate }};">
+      <div style="position:absolute; top:-120px; left:-60px; width:560px; height:420px; border-radius:50%; filter:blur(46px); background:{{ bloomWarm }};"></div>
+      <div style="position:absolute; bottom:-140px; right:-80px; width:480px; height:360px; border-radius:50%; filter:blur(48px); background:{{ bloomCool }};"></div>
+      <div style="position:relative; height:100%; box-sizing:border-box; padding:38px 44px; display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; font-size:9.5px; letter-spacing:0.3em; text-transform:uppercase; color:{{ textDim }};">
+          <div>Thermal · Zen</div>
+          <div onClick="{{ goMain }}" style="cursor:pointer;" style-hover="opacity:0.6;">Exit</div>
+        </div>
+        <div style="flex:1; display:flex; align-items:center; gap:48px;">
+          <div style="display:flex; align-items:flex-start; gap:8px;">
+            <div style="font-size:148px; font-weight:100; letter-spacing:-0.055em; line-height:0.85; font-variant-numeric:tabular-nums; color:{{ textStrong }}; text-shadow:{{ zenGlow }};">{{ headlineNumber }}</div>
+            <div onClick="{{ toggleUnit }}" style="margin-top:16px; font-size:24px; font-weight:200; cursor:pointer; color:{{ textDim }};" style-hover="color:{{ textMid }};">{{ unitLabel }}</div>
+          </div>
+          <div style="flex:1; display:flex; flex-direction:column; gap:22px;">
+            <div style="font-size:18px; font-weight:200; line-height:1.45; text-wrap:pretty; color:{{ textMid }};">{{ sentence }}</div>
+            <div style="border-radius:12px; padding:4px 14px; border:1px solid {{ hairline }}; background:{{ glass }}; box-shadow:{{ inset }}; backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px);">
+              <sc-for list="{{ zenRows }}" as="r" hint-placeholder-count="3">
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid {{ rowBorder }};">
+                  <div style="width:5px; height:5px; border-radius:50%; background:{{ r.color }};"></div>
+                  <div style="flex:1; font-size:12px; color:{{ textMid }};">{{ r.label }}</div>
+                  <div style="font-size:12.5px; font-variant-numeric:tabular-nums; color:{{ textStrong }};">{{ r.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="margin-top:26px; display:flex; flex-direction:column; align-items:center; gap:14px;">
+    <div style="font-size:11px; letter-spacing:0.04em; color:{{ textDim }};">Click the menu bar chip to open or close · any row for detail · the ° to switch units · scrub the detail chart</div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div style="font-size:9.5px; letter-spacing:0.18em; text-transform:uppercase; color:{{ textDim }};">Load</div>
+      <div style="display:flex; gap:3px; border-radius:7px; padding:2px; border:1px solid {{ hairline }}; background:{{ chipBg }};">
+        <sc-for list="{{ loadOptions }}" as="l" hint-placeholder-count="3">
+          <div onClick="{{ l.pick }}" style="font-size:10px; letter-spacing:0.12em; text-transform:uppercase; padding:5px 12px; border-radius:5px; cursor:pointer; color:{{ l.color }}; background:{{ l.bg }};" style-hover="opacity:0.8;">{{ l.label }}</div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+      <div onClick="{{ goOnboard }}" style="font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border-radius:6px; padding:6px 11px; cursor:pointer; color:{{ textMid }}; border:1px solid {{ hairline }};" style-hover="opacity:0.75;">First run</div>
+      <div onClick="{{ showNotifNow }}" style="font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border-radius:6px; padding:6px 11px; cursor:pointer; color:{{ textMid }}; border:1px solid {{ hairline }}; background:{{ bgNotif }};" style-hover="opacity:0.75;">Notification</div>
+      <div onClick="{{ toggleFresh }}" style="font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border-radius:6px; padding:6px 11px; cursor:pointer; color:{{ textMid }}; border:1px solid {{ hairline }}; background:{{ bgFresh }};" style-hover="opacity:0.75;">No history</div>
+      <div onClick="{{ goConnecting }}" style="font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border-radius:6px; padding:6px 11px; cursor:pointer; color:{{ textMid }}; border:1px solid {{ hairline }};" style-hover="opacity:0.75;">Connecting</div>
+      <div onClick="{{ goError }}" style="font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border-radius:6px; padding:6px 11px; cursor:pointer; color:{{ textMid }}; border:1px solid {{ hairline }};" style-hover="opacity:0.75;">Sensor error</div>
+      <div onClick="{{ toggleFanless }}" style="font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border-radius:6px; padding:6px 11px; cursor:pointer; color:{{ textMid }}; border:1px solid {{ hairline }}; background:{{ bgFanless }};" style-hover="opacity:0.75;">Fanless Mac</div>
+      <div onClick="{{ toggleTheme }}" style="font-size:10px; letter-spacing:0.12em; text-transform:uppercase; border-radius:6px; padding:6px 11px; cursor:pointer; color:{{ textMid }}; border:1px solid {{ hairline }};" style-hover="opacity:0.75;">{{ themeLabel }}</div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:860},&quot;initialScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;main&quot;,&quot;onboard&quot;,&quot;why&quot;,&quot;sensors&quot;,&quot;history&quot;,&quot;events&quot;,&quot;fans&quot;,&quot;settings&quot;,&quot;connecting&quot;,&quot;denied&quot;,&quot;error&quot;],&quot;default&quot;:&quot;main&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype state&quot;},&quot;initialLoad&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;idle&quot;,&quot;normal&quot;,&quot;hot&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype state&quot;},&quot;menuBarStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;both&quot;,&quot;number&quot;,&quot;chip&quot;],&quot;default&quot;:&quot;both&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototype state&quot;}}">
+class Component extends DCLogic {
+  state = {
+    open: true, screen: (this.props && this.props.initialScreen) || 'main',
+    unit: 'C', detail: 'pcore', theme: 'dark', quit: {},
+    load: (this.props && this.props.initialLoad) || 'normal',
+    fanless: false, fresh: false, notif: false, range: '24h',
+    mbStyle: (this.props && this.props.menuBarStyle) || 'both',
+    mbMenuOpen: false, obStep: 0, query: '', cursor: null,
+    refresh: 2, launch: true, thresholdC: 90
+  };
+
+  base() {
+    return {
+      pcore:   { label: 'CPU — Performance', c: 83, peak: 91, explain: 'The performance cores handle demanding work — compiles, exports, rendering. Sustained highs are normal; macOS manages them.', sensors: [['Tp01 · P-core 0', 83.4], ['Tp05 · P-core 1', 81.9], ['Tp09 · P-core 2', 84.1], ['Tp0D · P-core 3', 80.2]] },
+      ecore:   { label: 'CPU — Efficiency',  c: 67, peak: 74, explain: 'The efficiency cores run background work — indexing, sync, notifications. They stay cool almost all the time.', sensors: [['Te01 · E-core 0', 66.8], ['Te05 · E-core 1', 67.4]] },
+      gpu:     { label: 'Graphics (GPU)',    c: 61, peak: 74, explain: 'Graphics work: displays, video decode, rendering. It warms in bursts rather than staying hot.', sensors: [['Tg05 · GPU cluster 0', 60.4], ['Tg0D · GPU cluster 1', 61.8]] },
+      mem:     { label: 'Memory',            c: 51, peak: 58, explain: 'Unified memory sits beside the chip on the same package, so it tracks the die but stays much cooler.', sensors: [['Tm02 · DRAM 0', 50.6], ['Tm06 · DRAM 1', 51.4]] },
+      power:   { label: 'Power delivery',    c: 83, peak: 90, explain: 'The regulators feeding the chip. They run hot by design — normal even when the CPU is close to idle.', sensors: [['Ts01 · VRM A', 82.7], ['Ts05 · VRM B', 83.6]] },
+      display: { label: 'Display',           c: 71, peak: 76, explain: 'Backlight and panel driver. Brightness matters more here than workload.', sensors: [['Td01 · Panel', 70.8]] },
+      chassis: { label: 'Chassis & airflow', c: 57, peak: 61, explain: 'Skin and airflow sensors — the closest thing to how warm the Mac feels in your hands.', sensors: [['Ta01 · Airflow in', 42.1], ['Tc0A · Top case', 57.3]] },
+      storage: { label: 'Storage (SSD)',     c: 42, peak: 47, explain: 'The SSD controller. It spikes during big copies and settles within seconds.', sensors: [['Tn01 · NAND', 41.8]] }
+    };
+  }
+
+  levels() {
+    return {
+      idle: { pcore: 41, ecore: 36, gpu: 34, mem: 35, power: 47, display: 39, chassis: 30, storage: 32 },
+      hot:  { pcore: 97, ecore: 81, gpu: 88, mem: 64, power: 95, display: 74, chassis: 72, storage: 45 }
+    };
+  }
+
+  groups() {
+    const g = this.base();
+    const lv = this.state.load;
+    if (lv === 'normal') return g;
+    const map = this.levels()[lv];
+    Object.keys(map).forEach(k => {
+      const delta = map[k] - g[k].c;
+      g[k].c = map[k];
+      g[k].peak = lv === 'hot' ? Math.max(g[k].peak, map[k]) : map[k] + 6;
+      g[k].sensors = g[k].sensors.map(s => [s[0], Math.round((s[1] + delta) * 10) / 10]);
+    });
+    return g;
+  }
+
+  shapes() {
+    return {
+      pcore:   [0.15, 0.18, 0.22, 0.30, 0.28, 0.45, 0.40, 0.62, 0.55, 0.78, 0.70, 0.92, 1.00],
+      ecore:   [0.30, 0.34, 0.28, 0.40, 0.44, 0.38, 0.50, 0.55, 0.62, 0.58, 0.72, 0.85, 1.00],
+      gpu:     [0.20, 0.25, 0.85, 1.00, 0.60, 0.42, 0.38, 0.45, 0.40, 0.52, 0.58, 0.70, 0.75],
+      mem:     [0.35, 0.38, 0.42, 0.40, 0.50, 0.55, 0.52, 0.60, 0.65, 0.70, 0.80, 0.90, 1.00],
+      power:   [0.40, 0.42, 0.48, 0.45, 0.58, 0.62, 0.70, 0.66, 0.78, 0.85, 0.92, 0.96, 1.00],
+      display: [0.50, 0.52, 0.55, 0.58, 0.60, 0.62, 0.65, 0.68, 0.70, 0.75, 0.80, 0.90, 1.00],
+      chassis: [0.25, 0.28, 0.32, 0.36, 0.40, 0.45, 0.50, 0.55, 0.62, 0.70, 0.80, 0.90, 1.00],
+      storage: [0.30, 0.35, 0.80, 0.45, 0.38, 0.35, 0.42, 0.40, 0.55, 0.48, 0.60, 0.70, 0.75]
+    };
+  }
+
+  hist() {
+    return {
+      '24h': {
+        pcore:   [0.20, 0.25, 0.30, 0.22, 0.55, 0.68, 0.45, 0.35, 0.40, 0.85, 1.00, 0.60, 0.45, 0.35],
+        gpu:     [0.20, 0.25, 0.75, 0.85, 0.50, 0.35, 0.30, 0.40, 0.35, 0.55, 0.60, 0.45, 0.35, 0.30],
+        chassis: [0.30, 0.32, 0.40, 0.45, 0.38, 0.42, 0.40, 0.44, 0.45, 0.70, 0.80, 0.60, 0.45, 0.40],
+        axis: ['00:00', '06:00', '12:00', '18:00', 'Now'],
+        sub: 'Two busy stretches today.',
+        annP: '2:14 PM · Xcode build', annPLeft: '56%',
+        annG: '9:40 AM · Export', annGLeft: '16%',
+        events: '4 throttle events today'
+      },
+      '7d': {
+        pcore:   [0.40, 0.60, 0.35, 0.30, 0.50, 0.85, 1.00, 0.70, 0.45, 0.40, 0.60, 0.75, 0.50, 0.45],
+        gpu:     [0.30, 0.40, 0.80, 0.90, 0.45, 0.35, 0.40, 0.50, 0.60, 0.40, 0.35, 0.45, 0.50, 0.40],
+        chassis: [0.35, 0.45, 0.40, 0.38, 0.45, 0.60, 0.70, 0.55, 0.45, 0.40, 0.50, 0.60, 0.45, 0.40],
+        axis: ['Thu', 'Sat', 'Mon', 'Tue', 'Now'],
+        sub: 'Tuesday ran hottest — three long builds.',
+        annP: 'Tue · 4 h build', annPLeft: '46%',
+        annG: 'Sat · Video export', annGLeft: '18%',
+        events: '9 throttle events this week'
+      },
+      '30d': {
+        pcore:   [0.30, 0.45, 0.70, 0.50, 0.35, 0.40, 0.60, 0.90, 1.00, 0.75, 0.50, 0.45, 0.60, 0.50],
+        gpu:     [0.25, 0.60, 0.80, 0.50, 0.35, 0.30, 0.45, 0.55, 0.60, 0.50, 0.40, 0.35, 0.50, 0.45],
+        chassis: [0.30, 0.40, 0.50, 0.45, 0.40, 0.42, 0.50, 0.65, 0.70, 0.60, 0.50, 0.45, 0.55, 0.50],
+        axis: ['Jul 25', 'Aug 1', 'Aug 8', 'Aug 15', 'Now'],
+        sub: 'Two hot weeks. Both were release weeks.',
+        annP: 'Aug 11 · Release week', annPLeft: '54%',
+        annG: 'Jul 29 · Export batch', annGLeft: '12%',
+        events: '31 throttle events this month'
+      }
+    };
+  }
+
+  poly(shape, w, h) {
+    const n = shape.length;
+    return shape.map((v, i) => {
+      const x = Math.round((i / (n - 1)) * w * 10) / 10;
+      const y = Math.round(((h - 4) - v * (h - 10)) * 10) / 10;
+      return x + ',' + y;
+    }).join(' ');
+  }
+
+  light() { return this.state.theme === 'light'; }
+  fmt(c) { return this.state.unit === 'F' ? Math.round(c * 9 / 5 + 32) + '°' : Math.round(c) + '°'; }
+  num(c) { return this.state.unit === 'F' ? String(Math.round(c * 9 / 5 + 32)) : String(Math.round(c)); }
+
+  color(c) {
+    const L = this.light();
+    if (c >= 90) return L ? 'oklch(0.55 0.18 30)' : 'oklch(0.65 0.19 30)';
+    if (c >= 70) return L ? 'oklch(0.68 0.14 68)' : 'oklch(0.78 0.13 75)';
+    if (c >= 55) return L ? 'oklch(0.62 0.06 155)' : 'oklch(0.74 0.05 155)';
+    return L ? 'oklch(0.60 0.07 235)' : 'oklch(0.70 0.06 235)';
+  }
+  bloom(c, alpha) {
+    const L = this.light();
+    const a = (L ? alpha * 0.7 : alpha).toFixed(3);
+    if (c >= 90) return 'radial-gradient(circle, oklch(0.65 0.19 30 / ' + a + '), transparent 70%)';
+    if (c >= 70) return 'radial-gradient(circle, oklch(0.78 0.13 75 / ' + a + '), transparent 70%)';
+    if (c >= 55) return 'radial-gradient(circle, oklch(0.74 0.05 155 / ' + a + '), transparent 70%)';
+    return 'radial-gradient(circle, oklch(0.70 0.06 235 / ' + a + '), transparent 70%)';
+  }
+  status(c) {
+    if (c >= 90) return 'Hot';
+    if (c >= 70) return 'Warm';
+    if (c >= 55) return 'Normal';
+    return 'Cool';
+  }
+  pressure(c) {
+    if (c >= 95) return 'Serious';
+    if (c >= 88) return 'Fair';
+    return 'Nominal';
+  }
+
+  go(screen) { return () => this.setState({ screen: screen, mbMenuOpen: false, cursor: null }); }
+
+  connect() {
+    this.setState({ open: true, screen: 'connecting', mbMenuOpen: false });
+    clearTimeout(this._ct);
+    this._ct = setTimeout(() => this.setState({ screen: 'main' }), 1900);
+  }
+  openDetail(key) { return () => this.setState({ screen: 'detail', detail: key, cursor: null }); }
+
+  theme() {
+    const hotSub = this.state.load === 'hot';
+    if (this.light()) {
+      return {
+        stage: '#e8e6e3',
+        menubar: 'rgba(246,246,248,0.96)',
+        menuText: '#1c1c1f',
+        menuPanel: 'rgba(250,250,252,0.98)',
+        notifBg: 'rgba(252,251,252,0.86)',
+        substrate: hotSub
+          ? 'linear-gradient(180deg, #fdf3f0 0%, #f7f5f6 58%, #f3f3f6 100%)'
+          : 'linear-gradient(180deg, #fdf8f4 0%, #f7f7f9 58%, #f3f3f6 100%)',
+        glass: 'rgba(255,255,255,0.62)',
+        glassSoft: 'rgba(255,255,255,0.45)',
+        hairline: 'rgba(0,0,0,0.08)',
+        rowBorder: 'rgba(0,0,0,0.05)',
+        inset: 'inset 0 1px 0 rgba(255,255,255,0.9)',
+        textStrong: '#17130f',
+        textMid: 'rgba(20,20,24,0.72)',
+        textDim: 'rgba(20,20,24,0.45)',
+        chipBg: 'rgba(255,255,255,0.7)',
+        hoverBg: 'rgba(0,0,0,0.05)',
+        rail: 'rgba(0,0,0,0.12)',
+        knob: '#ffffff',
+        toggleOn: 'rgba(0,0,0,0.28)',
+        crosshair: 'rgba(0,0,0,0.25)',
+        neutralLine: 'rgba(20,20,24,0.42)',
+        neutralLineSoft: 'rgba(20,20,24,0.28)',
+        neutralDot: 'rgba(20,20,24,0.5)',
+        annotation: 'rgba(120,80,40,0.85)',
+        primaryBg: '#1b1a1d',
+        primaryText: '#fbf9f6',
+        primaryBorder: '#1b1a1d'
+      };
+    }
+    return {
+      stage: '#0f0f11',
+      menubar: 'rgba(24,24,27,0.96)',
+      menuText: '#e6e6ea',
+      menuPanel: 'rgba(34,33,37,0.98)',
+      notifBg: 'rgba(30,29,33,0.78)',
+      substrate: hotSub
+        ? 'linear-gradient(180deg, #241618 0%, #161113 58%, #100d0e 100%)'
+        : 'linear-gradient(180deg, #1a1719 0%, #111114 58%, #0e0e11 100%)',
+      glass: 'rgba(255,255,255,0.055)',
+      glassSoft: 'rgba(255,255,255,0.035)',
+      hairline: 'rgba(255,255,255,0.09)',
+      rowBorder: 'rgba(255,255,255,0.055)',
+      inset: 'inset 0 1px 0 rgba(255,255,255,0.09)',
+      textStrong: '#fbf7f2',
+      textMid: 'rgba(255,255,255,0.72)',
+      textDim: 'rgba(255,255,255,0.45)',
+      chipBg: 'rgba(255,255,255,0.07)',
+      hoverBg: 'rgba(255,255,255,0.09)',
+      rail: 'rgba(255,255,255,0.12)',
+      knob: '#f4f4f8',
+      toggleOn: 'rgba(255,255,255,0.24)',
+      crosshair: 'rgba(255,255,255,0.25)',
+      neutralLine: 'rgba(255,255,255,0.5)',
+      neutralLineSoft: 'rgba(255,255,255,0.32)',
+      neutralDot: 'rgba(255,255,255,0.6)',
+      annotation: 'rgba(255,220,190,0.7)',
+      primaryBg: '#f6f3ee',
+      primaryText: '#17130f',
+      primaryBorder: '#f6f3ee'
+    };
+  }
+
+  clock(frac) {
+    const mins = Math.round(frac * 14.5 * 60);
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+  }
+
+  renderVals() {
+    const t = this.theme();
+    const g = this.groups();
+    const s = this.state;
+    const isErr = s.screen === 'error';
+    const blind = isErr || s.screen === 'connecting' || s.screen === 'denied';
+    const hotKey = Object.keys(g).reduce((a, k) => (g[k].c > g[a].c ? k : a), 'pcore');
+    const head = g[hotKey];
+    const d = g[s.detail] || g.pcore;
+    const hot = s.load === 'hot';
+    const idle = s.load === 'idle';
+    const fresh = !!s.fresh;
+
+    const order = ['pcore', 'ecore', 'gpu', 'mem', 'power', 'display'];
+    const rows = order.map(k => ({
+      label: g[k].label,
+      value: this.fmt(g[k].c),
+      color: this.color(g[k].c),
+      glow: k === hotKey ? '0 0 8px ' + this.color(g[k].c) : 'none',
+      labelColor: k === hotKey ? t.textStrong : t.textMid,
+      valueColor: k === hotKey ? t.textStrong : t.textMid,
+      open: this.openDetail(k)
+    }));
+
+    const q = s.query.trim().toLowerCase();
+    const allKeys = Object.keys(g).filter(k => {
+      if (!q) return true;
+      if (g[k].label.toLowerCase().indexOf(q) >= 0) return true;
+      return g[k].sensors.some(x => x[0].toLowerCase().indexOf(q) >= 0);
+    });
+    const allRows = allKeys.map(k => ({
+      label: g[k].label,
+      value: this.fmt(g[k].c),
+      color: this.color(g[k].c),
+      meta: g[k].sensors.length + (g[k].sensors.length === 1 ? ' sensor · peak ' : ' sensors · peak ') + this.fmt(g[k].peak),
+      open: this.openDetail(k)
+    }));
+
+    const zenRows = ['ecore', 'gpu', 'mem'].map(k => ({
+      label: g[k].label, value: this.fmt(g[k].c), color: this.color(g[k].c)
+    }));
+
+    const shape = this.shapes()[s.detail] || this.shapes().pcore;
+    const n = shape.length;
+    const cur = s.cursor === null ? n - 1 : Math.max(0, Math.min(n - 1, s.cursor));
+    const curTemp = d.c - (1 - shape[cur]) * 24;
+    const scrubbing = s.cursor !== null;
+
+    const H = this.hist()[s.range];
+    const hp = H.pcore, hg = H.gpu, hc = H.chassis;
+    const iP = hp.indexOf(Math.max.apply(null, hp));
+    const iG = hg.indexOf(Math.max.apply(null, hg));
+
+    const procAll = [
+      { name: 'Google Chrome', note: '38 tabs', cpu: hot ? '214%' : '96%', strong: true },
+      { name: 'Xcode', note: 'Building · Aurora', cpu: hot ? '186%' : '74%', strong: true },
+      { name: 'Docker Desktop', note: '6 containers', cpu: '94%', strong: false },
+      { name: 'Final Cut Pro', note: 'Background render', cpu: '61%', strong: false }
+    ];
+    const processes = (idle ? [] : procAll).filter(p => !s.quit[p.name]).map(p => ({
+      name: p.name, note: p.note, cpu: p.cpu,
+      color: p.strong ? this.color(head.c) : t.textMid,
+      quit: () => this.setState(st => ({ quit: Object.assign({}, st.quit, { [p.name]: true }) }))
+    }));
+
+    const fanRpm = hot ? 4720 : (idle ? 1210 : 2480);
+    const pct = (rpm) => Math.round(Math.max(4, Math.min(100, ((rpm - 1200) / 4200) * 100))) + '%';
+    const sp = (v) => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+
+    const eventsAll = [
+      { when: 'Today · 2:14 PM', dur: '6 min', mins: 6, peak: 97, cause: 'Xcode build · Chrome', age: 0 },
+      { when: 'Today · 9:41 AM', dur: '2 min', mins: 2, peak: 92, cause: 'Final Cut export', age: 0 },
+      { when: 'Mon · 4:08 PM', dur: '18 min', mins: 18, peak: 99, cause: 'Docker build', age: 2 },
+      { when: 'Sun · 11:20 AM', dur: '3 min', mins: 3, peak: 93, cause: 'macOS update', age: 3 },
+      { when: 'Sat · 8:52 PM', dur: '4 min', mins: 4, peak: 91, cause: 'Photos analysis', age: 4 },
+      { when: 'Aug 14 · 3:30 PM', dur: '11 min', mins: 11, peak: 98, cause: 'Release build', age: 9 },
+      { when: 'Aug 11 · 10:06 AM', dur: '7 min', mins: 7, peak: 95, cause: 'Xcode archive', age: 12 },
+      { when: 'Aug 3 · 6:14 PM', dur: '9 min', mins: 9, peak: 96, cause: 'Export batch', age: 20 }
+    ];
+    const span = s.range === '24h' ? 1 : (s.range === '7d' ? 7 : 30);
+    const eventsRaw = eventsAll.filter(e => e.age < span);
+    const evMins = eventsRaw.reduce((a, e) => a + e.mins, 0);
+    const evWord = ['no times', 'once', 'twice', 'three times', 'four times', 'five times', 'six times', 'seven times', 'eight times'][eventsRaw.length] || (eventsRaw.length + ' times');
+    const evPeriod = s.range === '24h' ? 'today' : (s.range === '7d' ? 'this week' : 'this month');
+    const events = eventsRaw.map(e => ({
+      when: e.when, dur: e.dur, cause: e.cause,
+      peak: this.fmt(e.peak),
+      peakColor: this.color(e.peak),
+      dot: this.color(e.peak)
+    }));
+
+    const mbDefs = [
+      { key: 'both', label: 'Chip + number', note: 'Colour and reading', chip: true, number: true },
+      { key: 'number', label: 'Number only', note: 'Quietest option', chip: false, number: true },
+      { key: 'chip', label: 'Chip only', note: 'Colour at a glance', chip: true, number: false }
+    ];
+    const mbOptions = mbDefs.map(o => ({
+      label: o.label, note: o.note, chip: o.chip, number: o.number,
+      check: s.mbStyle === o.key ? '✓' : '',
+      bg: s.mbStyle === o.key ? t.hoverBg : 'transparent',
+      border: s.mbStyle === o.key ? t.textDim : t.hairline,
+      pick: () => this.setState({ mbStyle: o.key, mbMenuOpen: false })
+    }));
+    const mbCur = mbDefs.filter(o => o.key === s.mbStyle)[0] || mbDefs[0];
+
+    const loadOptions = [
+      { key: 'idle', label: 'Cool' },
+      { key: 'normal', label: 'Warm' },
+      { key: 'hot', label: 'Hot' }
+    ].map(o => ({
+      label: o.label,
+      color: s.load === o.key ? t.textStrong : t.textDim,
+      bg: s.load === o.key ? t.hoverBg : 'transparent',
+      pick: () => this.setState({ load: o.key, notif: o.key === 'hot', screen: 'main', cursor: null })
+    }));
+
+    const ranges = ['24h', '7d', '30d'].map(r => ({
+      label: r,
+      color: s.range === r ? t.textStrong : t.textDim,
+      bg: s.range === r ? t.hoverBg : 'transparent',
+      pick: () => this.setState({ range: r })
+    }));
+
+    const obDots = [0, 1, 2].map(i => ({ bg: i === s.obStep ? t.textStrong : t.rail }));
+
+    const headers = {
+      main: ['MacBook Pro · M4 Pro', blind ? 'No data' : this.pressure(head.c)],
+      why: [idle ? '← What is running' : '← Why is it hot', 'Top processes'],
+      sensors: ['← All sensors', allRows.length + ' of 8 groups'],
+      detail: ['← ' + d.label, d.sensors.length + ' sensors'],
+      history: ['← History', s.range === '24h' ? 'Today' : (s.range === '7d' ? '7 days' : '30 days')],
+      events: ['← Throttle log', s.range === '24h' ? 'Today' : (s.range === '7d' ? 'Last 7 days' : 'Last 30 days')],
+      fans: ['← Fans', s.fanless ? 'Fanless' : '2 units'],
+      settings: ['← Settings', 'Thermal 1.0'],
+      error: ['MacBook Pro · M4 Pro', 'No data'],
+      connecting: ['MacBook Pro · M4 Pro', 'Starting'],
+      denied: ['Thermal', 'No access'],
+      zen: ['Thermal · Zen', this.status(head.c)]
+    };
+    const hdr = headers[s.screen] || headers.main;
+    const nav = (screen) => (s.screen === screen ? t.textStrong : t.textDim);
+    const chromeless = s.screen === 'onboard' || s.screen === 'denied' || s.screen === 'connecting';
+
+    return Object.assign({}, t, {
+      showPopover: s.open && s.screen !== 'zen',
+      isZen: s.open && s.screen === 'zen',
+      showHeader: !(s.screen === 'onboard'),
+      showFooter: !chromeless,
+      isMain: s.screen === 'main',
+      isWhy: s.screen === 'why',
+      isSensors: s.screen === 'sensors',
+      isDetail: s.screen === 'detail',
+      isHistory: s.screen === 'history',
+      isEvents: s.screen === 'events',
+      isFans: s.screen === 'fans',
+      isSettings: s.screen === 'settings',
+      isError: isErr,
+      isOnboard: s.screen === 'onboard',
+      isDenied: s.screen === 'denied',
+      isConnecting: s.screen === 'connecting',
+      throttling: hot && !blind,
+      fanless: !!s.fanless,
+      hasFans: !s.fanless,
+      hasHistory: !fresh,
+      noHistory: fresh,
+
+      headerLeft: hdr[0],
+      headerRight: hdr[1],
+      headlineNumber: blind ? '--' : this.num(head.c),
+      headlineValue: blind ? '--' : this.fmt(head.c),
+      headlineColor: blind ? t.textDim : this.color(head.c),
+      unitLabel: s.unit === 'F' ? '°F' : '°C',
+      chipBorder: blind ? t.hairline : this.color(head.c),
+      chipFill: blind ? 'transparent' : 'linear-gradient(180deg, ' + this.color(head.c) + ', transparent)',
+      mbShowChip: mbCur.chip,
+      mbShowNumber: mbCur.number,
+      mbLabel: mbCur.label,
+      mbMenuOpen: !!s.mbMenuOpen,
+      mbOptions: mbOptions,
+      bloomWarm: blind ? 'none' : this.bloom(head.c, 0.3),
+      bloomCool: blind ? 'none' : this.bloom(g.storage.c, 0.18),
+      numberGlow: blind ? 'none' : '0 2px 24px ' + this.color(head.c),
+      detailGlow: '0 2px 22px ' + this.color(d.c),
+      zenGlow: '0 4px 50px ' + this.color(head.c),
+      sentence: blind
+        ? 'No sensor data.'
+        : (hot
+          ? 'Your Mac is hot. ' + head.label + ' hit ' + this.fmt(head.c) + '.'
+          : (idle
+            ? 'Everything is cool. Nothing is working hard.'
+            : head.label + ' is warm. Expected under load.')),
+
+      rows: rows,
+      allRows: allRows,
+      noMatches: allRows.length === 0,
+      query: s.query,
+      onQuery: (e) => this.setState({ query: e.target.value }),
+      zenRows: zenRows,
+      vChassis: this.fmt(g.chassis.c),
+      pkPcore: this.fmt(g.pcore.peak),
+      pkGpu: this.fmt(g.gpu.peak),
+      cPcore: this.color(g.pcore.c),
+
+      histPcore: this.poly(hp, 300, 60),
+      histGpu: this.poly(hg, 300, 48),
+      histChassis: this.poly(hc, 300, 34),
+      histPcoreDotX: Math.round((iP / (hp.length - 1)) * 300),
+      histPcoreDotY: Math.round((56 - hp[iP] * 50) * 10) / 10,
+      histGpuDotX: Math.round((iG / (hg.length - 1)) * 300),
+      histGpuDotY: Math.round((44 - hg[iG] * 38) * 10) / 10,
+      axis: H.axis.map(a => ({ label: a })),
+      historySub: H.sub,
+      annPcore: H.annP, annPcoreLeft: H.annPLeft,
+      annGpu: H.annG, annGpuLeft: H.annGLeft,
+      eventsLink: eventsRaw.length + (eventsRaw.length === 1 ? ' throttle event ' : ' throttle events ') + evPeriod,
+      ranges: ranges,
+
+      events: events,
+      eventsTitle: 'Your Mac slowed itself down ' + evWord + ' ' + evPeriod + '.',
+      eventsSub: evMins + ' minutes in total, all of it during builds and exports.',
+
+      detailNumber: this.num(d.c),
+      detailPeakValue: this.fmt(d.peak),
+      detailExplain: d.explain,
+      detailColor: this.color(d.c),
+      detailChart: this.poly(shape, 300, 76),
+      detailAnnotation: fresh
+        ? 'Collecting'
+        : (scrubbing ? this.clock(cur / (n - 1)) + ' · ' + this.fmt(curTemp) : '14:12 · ' + this.fmt(d.peak)),
+      readoutColor: scrubbing ? t.textStrong : t.textDim,
+      cursorX: Math.round((cur / (n - 1)) * 300),
+      cursorY: Math.round((72 - shape[cur] * 66) * 10) / 10,
+      onScrub: (e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        const f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+        this.setState({ cursor: Math.round(f * (n - 1)) });
+      },
+      endScrub: () => this.setState({ cursor: null }),
+      detailSensors: d.sensors.map(x => ({ id: x[0], val: s.unit === 'F' ? (x[1] * 9 / 5 + 32).toFixed(1) : x[1].toFixed(1) })),
+
+      processes: processes,
+      hasProcesses: processes.length > 0,
+      noProcesses: processes.length === 0,
+      whyTitle: processes.length === 0
+        ? 'Nothing is driving the CPU.'
+        : (processes.length === 1 ? 'One app is keeping the CPU busy.' : processes.length + ' apps are keeping the CPU busy.'),
+      whySub: processes.length === 0
+        ? 'Temperatures should keep falling for the next few minutes.'
+        : 'Quitting the top one usually drops 10–15° within a minute.',
+      whyLinkLabel: idle ? 'What is running?' : 'Why is it hot?',
+      whyFooter: processes.length ? 'Updated 4 seconds ago' : 'Nothing heavy is running now.',
+
+      fanLeft: sp(fanRpm),
+      fanRight: sp(fanRpm + 30),
+      fanPctL: pct(fanRpm),
+      fanPctR: pct(fanRpm + 30),
+      fanChart: this.poly(hist24Fan(hot, idle), 300, 42),
+      fanNote: hot
+        ? 'Running near maximum. You can hear these.'
+        : (idle ? 'Barely turning. Silent from here.' : 'Ramping up gently. You probably can\'t hear them yet.'),
+
+      threshold: this.fmt(s.thresholdC),
+      thresholdUp: () => this.setState(st => ({ thresholdC: Math.min(100, st.thresholdC + 1) })),
+      thresholdDown: () => this.setState(st => ({ thresholdC: Math.max(60, st.thresholdC - 1) })),
+      refreshLabel: s.refresh + ' s',
+      refreshPct: Math.round(((s.refresh - 1) / 9) * 100) + '%',
+      setRefresh: (e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        const f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+        this.setState({ refresh: Math.max(1, Math.round(1 + f * 9)) });
+      },
+      launchBg: s.launch ? t.toggleOn : t.rail,
+      launchKnobLeft: s.launch ? '18px' : '2px',
+      toggleLaunch: () => this.setState(st => ({ launch: !st.launch })),
+      toggleMbMenu: () => this.setState(st => ({ mbMenuOpen: !st.mbMenuOpen })),
+
+      showNotif: !!s.notif,
+      notifTitle: 'Sustained ' + this.fmt(Math.max(s.thresholdC + 2, g.pcore.c)) + ' for five minutes',
+      notifBody: 'Chrome and Xcode are driving the CPU. Quitting Chrome usually drops 10–15°.',
+      dismissNotif: () => this.setState({ notif: false }),
+      notifShow: () => this.setState({ notif: false, open: true, screen: 'why' }),
+      showNotifNow: () => this.setState({ notif: true }),
+      bgNotif: s.notif ? t.hoverBg : 'transparent',
+
+      obStep0: s.obStep === 0,
+      obStep1: s.obStep === 1,
+      obStep2: s.obStep === 2,
+      obDots: obDots,
+      obPrimary: s.obStep === 0 ? 'Continue' : (s.obStep === 1 ? 'Allow access' : 'Start Thermal'),
+      obHasSecondary: s.obStep === 1,
+      obNext: () => { if (s.obStep >= 2) { this.setState({ obStep: 0 }); this.connect(); } else { this.setState({ obStep: s.obStep + 1 }); } },
+      obDeny: () => this.setState({ screen: 'denied', obStep: 0 }),
+      obAllow: () => this.connect(),
+      quitApp: () => this.setState({ open: false, screen: 'main' }),
+
+      bgCelsius: s.unit === 'C' ? t.hoverBg : 'transparent',
+      bgFahrenheit: s.unit === 'F' ? t.hoverBg : 'transparent',
+      bgLight: this.light() ? t.hoverBg : 'transparent',
+      bgDark: this.light() ? 'transparent' : t.hoverBg,
+      bgFanless: s.fanless ? t.hoverBg : 'transparent',
+      bgFresh: fresh ? t.hoverBg : 'transparent',
+      themeLabel: this.light() ? 'Dark mode' : 'Light mode',
+      loadOptions: loadOptions,
+
+      navMain: nav('main'), navHistory: nav('history'), navFans: nav('fans'), navSettings: nav('settings'),
+
+      togglePopover: () => this.setState(st => ({ open: !st.open })),
+      toggleUnit: () => this.setState(st => ({ unit: st.unit === 'C' ? 'F' : 'C' })),
+      setCelsius: () => this.setState({ unit: 'C' }),
+      setFahrenheit: () => this.setState({ unit: 'F' }),
+      toggleTheme: () => this.setState(st => ({ theme: st.theme === 'light' ? 'dark' : 'light' })),
+      setLight: () => this.setState({ theme: 'light' }),
+      setDark: () => this.setState({ theme: 'dark' }),
+      toggleFanless: () => this.setState(st => ({ fanless: !st.fanless })),
+      toggleFresh: () => this.setState(st => ({ fresh: !st.fresh })),
+      goMain: this.go('main'), goWhy: this.go('why'), goHistory: this.go('history'),
+      goSensors: this.go('sensors'), goEvents: this.go('events'),
+      goFans: this.go('fans'), goSettings: this.go('settings'), goZen: this.go('zen'),
+      goError: this.go('error'),
+      goOnboard: () => this.setState({ open: true, screen: 'onboard', obStep: 0 }),
+      goConnecting: () => this.connect()
+    });
+  }
+
+  componentWillUnmount() { clearTimeout(this._ct); }
+}
+
+function hist24Fan(hot, idle) {
+  const base = [0.18, 0.20, 0.24, 0.20, 0.42, 0.55, 0.35, 0.28, 0.32, 0.72, 0.88, 0.55, 0.40, 0.30];
+  if (idle) return base.map(v => v * 0.35);
+  if (hot) return base.map(v => Math.min(1, v * 1.15 + 0.1));
+  return base;
+}
+</script>
+</body>
+</html>

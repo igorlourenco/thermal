@@ -2,6 +2,7 @@ import Foundation
 
 // Usage:
 //   swift run tempsensors            -> launches the MENU BAR APP
+//   swift run tempsensors --demo hot -> app with prototype seed data (cool|warm|hot)
 //   swift run tempsensors --cli      -> terminal dashboard snapshot
 //   swift run tempsensors --watch    -> live terminal dashboard, 2s refresh
 //   swift run tempsensors --raw      -> raw sensor list (debugging)
