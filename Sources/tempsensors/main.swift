@@ -30,6 +30,9 @@ if smcReader == nil {
 let history = HistoryStore()
 let showRaw = CommandLine.arguments.contains("--raw")
 let watchMode = CommandLine.arguments.contains("--watch")
+// Warms up across --watch refreshes; a single snapshot stays on the
+// per-snapshot placeholder heuristic.
+let placeholderTracker = PlaceholderTracker()
 func allReadings() -> [TemperatureReading] {
     var readings = hidReader.readAll()
     if let smc = smcReader {
@@ -53,7 +56,7 @@ let line = String(repeating: "─", count: 62)
 // MARK: - Dashboard
 
 func printDashboard() {
-    let grouped = SensorLabeler.group(allReadings())
+    let grouped = SensorLabeler.group(allReadings(), tracker: placeholderTracker)
     history.record(grouped)
 
     guard !grouped.isEmpty else {
@@ -131,6 +134,19 @@ func printRawSnapshot() {
             (r.name as NSString).utf8String!,
             r.celsius,
             group.displayName
+        ))
+    }
+    print(String(repeating: "-", count: 60))
+
+    // What the app actually shows: the same readings after the full pipeline
+    // (noise filter -> dedup -> placeholder walls dropped -> grouped).
+    print("After pipeline (what the UI counts):")
+    for row in SensorLabeler.group(allReadings(), tracker: placeholderTracker) {
+        print(String(
+            format: "  %-22s %3d sensors   hottest %5.1f °C",
+            (row.group.displayName as NSString).utf8String!,
+            row.sensors.count,
+            row.celsius
         ))
     }
     print(String(repeating: "-", count: 60))

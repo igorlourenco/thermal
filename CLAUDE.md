@@ -15,6 +15,8 @@ swift run tempsensors --cli       # terminal dashboard, one snapshot
 swift run tempsensors --watch     # live terminal dashboard, 2s refresh
 swift run tempsensors --raw       # raw sensor list with group mapping (debugging)
 swift run tempsensors --watch --raw
+scripts/bundle.sh                 # release build -> dist/Thermal.app (ad-hoc signed)
+scripts/bundle.sh --debug --install   # debug bundle, copy to /Applications
 ```
 
 There is no test target in `Package.swift` — nothing to run via `swift test`. Verification is done by running `--raw` on real hardware and checking sensor names land in the right group (see "Verifying sensor mappings" below).
@@ -32,7 +34,9 @@ Readings merge from two independent sources at each poll:
 1. **`SensorReader`** — wraps the private `IOHIDEventSystemClient` API (declared in `Sources/CPrivateHID/include/CPrivateHID.h` since Apple ships no public header for it). Matches on Apple's vendor usage page (`0xff00`) / temperature usage (`5`). Provides die sensors (`PMU tdie…` on M3/M4; `pACC`/`eACC`/`GPU…` on M1/M2), NAND, battery.
 2. **`SMCReader`** — talks to the `AppleSMC` IOKit user client (struct/selectors in `Sources/CPrivateHID/include/CSMC.h`). At init it enumerates *every* SMC key via `#KEY` and keeps only temperature-typed (`T…` prefix, float-ish `flt `/`ioft`/`sp78` type) keys — no hardcoded per-machine key list, so it generalizes across chip generations. Also reads fan RPM (`FNum`, `F0Ac`…) over the same connection.
 
-Both readers return `[TemperatureReading]` (name + celsius). `SensorLabeler.group()` is the merge point: filters noise → `deduplicate` (collapse same-name readings to max) → `dropPlaceholders` (drops sibling-key families with bit-identical values, e.g. a wall of `Tp0…` all at exactly 40.0°) → `classify` each name into a `SensorGroup` by prefix pattern (`Te`→ CPU efficiency, `Tg`→ GPU, `Ts`→ chassis, `tdie`→ generic SoC, etc.) → picks each group's hottest sensor and a per-group `ThermalStatus` (Cool/Normal/Warm/Hot) via `ThermalStatus.thresholds(for:)`, since 75° is warm for a CPU die but a battery is warm at 40°.
+Both readers return `[TemperatureReading]` (name + celsius). `SensorLabeler.group()` is the merge point: filters noise → `deduplicate` (collapse same-name readings to max) → placeholder-wall removal → `classify` each name into a `SensorGroup` by prefix pattern (`Te`→ CPU efficiency, `Tg`→ GPU, `Ts`→ chassis, `tdie`→ generic SoC, etc.) → picks each group's hottest sensor and a per-group `ThermalStatus` (Cool/Normal/Warm/Hot) via `ThermalStatus.thresholds(for:)`, since 75° is warm for a CPU die but a battery is warm at 40°.
+
+**Placeholder walls** (e.g. 45 `Tp0…` keys frozen at 40.0° on M4 Pro) can't be detected reliably from one snapshot: under load they jitter microscopically (leak in), and at idle real sensors quantize into exact collisions (get over-dropped). Callers that poll (the app, `--watch`) pass a `PlaceholderTracker` to `group(_:tracker:)` — a channel is a placeholder only if it never moves across polls *while reading something plausible* (walls flicker to garbage 2–5° values, which don't count as movement) and ≥4 same-prefix siblings sit static at the same value; garbage readings inside a wall family are dropped too. Single snapshots fall back to the per-snapshot heuristic (`dropPlaceholders`). Verify with `--watch --raw`, which prints an "After pipeline" summary of exactly what the UI counts.
 
 `HistoryStore` records each `group()` snapshot in-memory (rolling 24h, per-process — no persistence yet) and derives trend arrows and session peaks per group id.
 

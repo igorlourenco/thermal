@@ -91,6 +91,10 @@ final class ThermalModel: ObservableObject {
 
     @Published var phase: Phase
     @Published var screen: Screen = .now
+
+    /// Where "←" returns to. Screen-to-screen links push; the footer nav and
+    /// the header back affordance pop/reset.
+    private var backStack: [Screen] = []
     @Published var detailGroup: SensorGroup = .cpuPerformance
     @Published var range: HistoryRange = .day
     @Published var query = ""
@@ -133,6 +137,7 @@ final class ThermalModel: ObservableObject {
     let history = HistoryStore()
     let eventLog = ThermalEventLog()
     let governor = NotificationGovernor()
+    let placeholderTracker = PlaceholderTracker()
     let demo: DemoData?
 
     private var hid: SensorReader?
@@ -198,6 +203,7 @@ final class ThermalModel: ObservableObject {
             guard let self, !Task.isCancelled else { return }
             self.refresh()
             self.phase = self.sensorsAvailable ? .ready : .failure
+            self.backStack.removeAll()
             self.screen = .now
         }
     }
@@ -263,7 +269,7 @@ final class ThermalModel: ObservableObject {
         var readings = hid?.readAll() ?? []
         if let smc { readings += smc.temperatures() }
 
-        let newGrouped = SensorLabeler.group(readings)
+        let newGrouped = SensorLabeler.group(readings, tracker: placeholderTracker)
         history.record(newGrouped)
 
         grouped = newGrouped
@@ -473,12 +479,30 @@ final class ThermalModel: ObservableObject {
         return allEvents.filter { $0.date >= start }
     }
 
-    // MARK: Actions
+    // MARK: Navigation
+
+    /// In-flow link (row, banner, footer-pair button): remembers where you were.
+    func navigate(to newScreen: Screen) {
+        backStack.append(screen)
+        screen = newScreen
+    }
+
+    /// Footer nav: a direct jump, not a step in a flow — clears the trail.
+    func jump(to newScreen: Screen) {
+        backStack.removeAll()
+        screen = newScreen
+    }
+
+    func goBack() {
+        screen = backStack.popLast() ?? .now
+    }
 
     func openDetail(_ group: SensorGroup) {
         detailGroup = group
-        screen = .detail
+        navigate(to: .detail)
     }
+
+    // MARK: Actions
 
     func quitProcess(_ process: HeatProcess) {
         guard demo == nil else { return }

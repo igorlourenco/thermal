@@ -146,6 +146,52 @@ struct GroupedReading: Identifiable {
     }
 }
 
+/// Learns which channels are placeholders by watching them over time.
+/// Real thermal sensors jitter between polls; limit/config channels
+/// ("placeholder walls") never move at all.
+final class PlaceholderTracker {
+
+    private struct Entry {
+        var value: Double
+        var samples: Int
+        var changed: Bool
+    }
+
+    private var entries: [String: Entry] = [:]
+    private(set) var polls = 0
+
+    /// Enough observations to trust time-based detection.
+    var warmedUp: Bool { polls >= 5 }
+
+    func observe(_ readings: [TemperatureReading]) {
+        polls += 1
+        for r in readings {
+            // Placeholder walls flicker to garbage (2–5 °C) between reads of
+            // their frozen value. Garbage doesn't count as movement — a wall
+            // is a channel that never moves when it reads something plausible.
+            guard r.celsius >= 15 else { continue }
+            if var entry = entries[r.name] {
+                if entry.value != r.celsius {
+                    entry.changed = true
+                    entry.value = r.celsius
+                }
+                entry.samples += 1
+                entries[r.name] = entry
+            } else {
+                entries[r.name] = Entry(value: r.celsius, samples: 1, changed: false)
+            }
+        }
+    }
+
+    /// True when the channel has never moved across its plausible samples.
+    /// 3 samples is enough — the >=4-sibling family rule in dropStaticWalls
+    /// guards against real sensors that idle still for a few polls.
+    func isStatic(_ name: String) -> Bool {
+        guard let entry = entries[name] else { return false }
+        return !entry.changed && entry.samples >= 3
+    }
+}
+
 enum SensorLabeler {
 
     /// Maps a raw sensor name to a group.
@@ -266,9 +312,58 @@ enum SensorLabeler {
         return byName.map { TemperatureReading(name: $0.key, celsius: $0.value) }
     }
 
+    /// Drops placeholder walls using observed history: a channel counts as a
+    /// placeholder only if it has NEVER moved across the tracker's polls AND
+    /// at least 4 same-prefix siblings sit static at the same value. Immune
+    /// to the two failure modes of the snapshot heuristic: walls that jitter
+    /// microscopically under load (kept by mistake), and real sensors whose
+    /// coarse quantization makes them collide at idle (dropped by mistake).
+    static func dropStaticWalls(
+        _ readings: [TemperatureReading], tracker: PlaceholderTracker
+    ) -> [TemperatureReading] {
+        struct FamilyValue: Hashable {
+            let prefix: String
+            let celsius: Double
+        }
+
+        var staticCount: [FamilyValue: Int] = [:]
+        for r in readings where tracker.isStatic(r.name) {
+            let key = FamilyValue(prefix: String(r.name.prefix(3)), celsius: r.celsius)
+            staticCount[key, default: 0] += 1
+        }
+
+        // A "wall": >= 4 same-prefix channels frozen at the same value.
+        let wallPairs = Set(staticCount.filter { $0.value >= 4 }.map(\.key))
+        let wallFamilies = Set(wallPairs.map(\.prefix))
+
+        return readings.filter { r in
+            let key = FamilyValue(prefix: String(r.name.prefix(3)), celsius: r.celsius)
+            // The wall value itself, static or momentarily matching.
+            if wallPairs.contains(key) { return false }
+            // Wall families also flicker to garbage (2–5 °C on this M4 Pro).
+            // No internal Mac part runs below ~15° in operation, so inside a
+            // wall family such readings are noise, not measurements.
+            if wallFamilies.contains(key.prefix), r.celsius < 15 { return false }
+            return true
+        }
+    }
+
     /// Main entry point: raw readings -> deduplicated, grouped, labeled rows.
-    static func group(_ readings: [TemperatureReading]) -> [GroupedReading] {
-        let clean = dropPlaceholders(deduplicate(readings.filter { !isNoise($0.name) }))
+    /// Pass a `PlaceholderTracker` wherever polling repeats (the app, --watch):
+    /// once warmed up it replaces the single-snapshot placeholder heuristic
+    /// with time-based detection.
+    static func group(
+        _ readings: [TemperatureReading], tracker: PlaceholderTracker? = nil
+    ) -> [GroupedReading] {
+        let deduped = deduplicate(readings.filter { !isNoise($0.name) })
+        tracker?.observe(deduped)
+
+        let clean: [TemperatureReading]
+        if let tracker, tracker.warmedUp {
+            clean = dropStaticWalls(deduped, tracker: tracker)
+        } else {
+            clean = dropPlaceholders(deduped)
+        }
         var buckets = Dictionary(grouping: clean) { classify($0.name) }
 
         // On machines with proper per-cluster CPU and GPU sensors (via SMC),

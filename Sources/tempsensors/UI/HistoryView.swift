@@ -133,7 +133,7 @@ struct HistoryView: View {
             }
             .padding(.top, 4)
             .contentShape(Rectangle())
-            .onTapGesture { model.screen = .events }
+            .onTapGesture { model.navigate(to: .events) }
         }
         .padding(.vertical, 14)
         .padding(.horizontal, 16)

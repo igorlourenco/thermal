@@ -86,7 +86,7 @@ struct NowView: View {
         .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(hotColor.opacity(0.12)))
         .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(hotColor.opacity(0.42), lineWidth: 1))
         .contentShape(Rectangle())
-        .onTapGesture { model.screen = .events }
+        .onTapGesture { model.navigate(to: .events) }
     }
 
     // MARK: Sensor list — one card, six rows
@@ -135,9 +135,9 @@ struct NowView: View {
             footerButton(
                 label: model.headlineBand == .cool ? "What is running?" : "Why is it hot?",
                 flexible: true
-            ) { model.screen = .why }
+            ) { model.navigate(to: .why) }
 
-            footerButton(label: "All sensors", flexible: false) { model.screen = .sensors }
+            footerButton(label: "All sensors", flexible: false) { model.navigate(to: .sensors) }
         }
     }
 

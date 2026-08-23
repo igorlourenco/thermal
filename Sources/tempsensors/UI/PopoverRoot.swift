@@ -184,7 +184,9 @@ struct HeaderBar: View {
                 .contentShape(Rectangle())
                 .onHover { hoveringLeft = $0 }
                 .onTapGesture {
-                    if model.phase == .ready { model.screen = .now }
+                    if model.phase == .ready, model.screen != .now {
+                        model.goBack()
+                    }
                 }
 
             Spacer()
@@ -243,7 +245,7 @@ struct HeaderBar: View {
     }
 
     private var pressureWord: String {
-        model.pressure.label
+        model.pressure.plainLabel
     }
 }
 
@@ -258,17 +260,17 @@ struct FooterNav: View {
         // space-between: equal gaps between the labels themselves, first and
         // last flush with the 16pt padding (prototype footer layout).
         HStack(spacing: 0) {
-            item("Now", active: model.screen == .now) { model.screen = .now }
+            item("Now", active: model.screen == .now) { model.jump(to: .now) }
             Spacer()
             item("History", active: model.screen == .history || model.screen == .events) {
-                model.screen = .history
+                model.jump(to: .history)
             }
             Spacer()
-            item("Fans", active: model.screen == .fans) { model.screen = .fans }
+            item("Fans", active: model.screen == .fans) { model.jump(to: .fans) }
             Spacer()
             item("Zen", active: false, action: openZen)
             Spacer()
-            item("Settings", active: model.screen == .settings) { model.screen = .settings }
+            item("Settings", active: model.screen == .settings) { model.jump(to: .settings) }
         }
         .padding(.vertical, 9)
         .padding(.horizontal, 16)

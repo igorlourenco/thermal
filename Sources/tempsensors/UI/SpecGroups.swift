@@ -63,6 +63,21 @@ extension SensorGroup {
     ]
 }
 
+/// Plain-language rendering of macOS's thermal pressure levels. The OS
+/// vocabulary (Nominal/Fair/Serious/Critical) stays in the data layer and
+/// persisted events; the UI translates for people who aren't engineers.
+extension ThermalPressure.State {
+    var plainLabel: String {
+        switch label {
+        case "Nominal":  return "All clear"
+        case "Fair":     return "Warming up"
+        case "Serious":  return "Slowed by heat"
+        case "Critical": return "Overheating"
+        default:         return label
+        }
+    }
+}
+
 /// Spell out small counts ("Four apps", "five times").
 func spelledOut(_ n: Int) -> String {
     let words = [

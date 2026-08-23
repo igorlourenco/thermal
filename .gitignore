@@ -21,4 +21,4 @@ DerivedData/
 
 # Editors
 .vscode/
-.idea/
+.idea/dist/
