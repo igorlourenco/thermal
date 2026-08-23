@@ -151,7 +151,7 @@ final class ThermalModel: ObservableObject {
         demo = demoLevel.map(DemoData.init)
 
         useFahrenheit = defaults.bool(forKey: "useFahrenheit")
-        appearance = Appearance(rawValue: defaults.string(forKey: "appearance") ?? "") ?? .dark
+        appearance = Appearance(rawValue: defaults.string(forKey: "appearance") ?? "") ?? .system
         menuBarStyle = MenuBarStyle(rawValue: defaults.string(forKey: "menuBarStyle") ?? "") ?? .both
         let storedRefresh = defaults.double(forKey: "refreshInterval")
         refreshInterval = storedRefresh >= 1 ? min(10, storedRefresh) : 2
@@ -307,8 +307,11 @@ final class ThermalModel: ObservableObject {
         grouped.max { $0.celsius < $1.celsius }
     }
 
-    /// The six rows on Now (§4.1). Chassis and storage stay behind
-    /// "All sensors" unless the machine lacks the preferred six.
+    /// The six rows on Now (§4.1). Fixed membership and order so rows never
+    /// reshuffle between refreshes; chassis and storage stay behind
+    /// "All sensors" unless the machine lacks the preferred six. One
+    /// exception: the hottest group always earns a row (it's the headline —
+    /// hiding it in All Sensors would be incoherent), displacing the coolest.
     var nowGroups: [GroupedReading] {
         let byGroup = Dictionary(uniqueKeysWithValues: grouped.map { ($0.group, $0) })
         var rows = SensorGroup.nowOrder.compactMap { byGroup[$0] }
@@ -318,7 +321,14 @@ final class ThermalModel: ObservableObject {
                 if let row = byGroup[group] { rows.append(row) }
             }
         }
-        return Array(rows.prefix(6))
+        rows = Array(rows.prefix(6))
+
+        if let hottest, !rows.contains(where: { $0.group == hottest.group }),
+           let coolest = rows.min(by: { $0.celsius < $1.celsius }),
+           let index = rows.firstIndex(where: { $0.group == coolest.group }) {
+            rows[index] = hottest
+        }
+        return rows
     }
 
     /// Every present group, spec order first, for All Sensors (§4.3).

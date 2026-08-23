@@ -70,12 +70,16 @@ struct MenuBarLabel: View {
 
     /// Ramp color as NSColor for the chip image (mirrors Theme.ramp).
     private func rampNSColor(_ celsius: Double, appearance: Appearance) -> NSColor {
+        let systemIsDark = NSApp.effectiveAppearance
+            .bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        let isDark = appearance.resolved(systemIsDark: systemIsDark) == .dark
+
         let hex: UInt32
         switch RampBand(celsius: celsius) {
-        case .hot:    hex = appearance == .dark ? 0xED5C48 : 0xC93E31
-        case .warm:   hex = appearance == .dark ? 0xEFAF5F : 0xCE8A3A
-        case .normal: hex = appearance == .dark ? 0x9CC7AC : 0x74A085
-        case .cool:   hex = appearance == .dark ? 0x86ADCB : 0x5F8CAD
+        case .hot:    hex = isDark ? 0xED5C48 : 0xC93E31
+        case .warm:   hex = isDark ? 0xEFAF5F : 0xCE8A3A
+        case .normal: hex = isDark ? 0x9CC7AC : 0x74A085
+        case .cool:   hex = isDark ? 0x86ADCB : 0x5F8CAD
         }
         return NSColor(
             srgbRed: CGFloat((hex >> 16) & 0xff) / 255,
@@ -87,11 +91,14 @@ struct MenuBarLabel: View {
 
     /// 13×13 rounded chip: ramp gradient fading to clear, 1px ramp border.
     /// nil color = blind state: hairline border, no fill.
+    /// The canvas is 2px wider than the chip — transparent right margin that
+    /// guarantees the gap to the reading even if the label flattens spacing.
     static func chipImage(color: NSColor?) -> NSImage {
-        let size = NSSize(width: 13, height: 13)
-        let image = NSImage(size: size, flipped: false) { rect in
+        let size = NSSize(width: 15, height: 13)
+        let image = NSImage(size: size, flipped: false) { _ in
+            let chipRect = NSRect(x: 0, y: 0, width: 13, height: 13)
             let path = NSBezierPath(
-                roundedRect: rect.insetBy(dx: 0.5, dy: 0.5),
+                roundedRect: chipRect.insetBy(dx: 0.5, dy: 0.5),
                 xRadius: 4, yRadius: 4
             )
             if let color {

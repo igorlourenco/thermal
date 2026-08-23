@@ -8,7 +8,13 @@ import SwiftUI
 // =============================================================================
 
 enum Appearance: String {
-    case dark, light
+    case system, dark, light
+
+    /// Theme only understands dark/light — resolve .system against the
+    /// current system scheme before building tokens.
+    func resolved(systemIsDark: Bool) -> Appearance {
+        self == .system ? (systemIsDark ? .dark : .light) : self
+    }
 }
 
 /// The four ramp bands. Thresholds are UI-wide (§3), not the per-component
@@ -140,18 +146,29 @@ struct CardBackground: ViewModifier {
             .background {
                 RoundedRectangle(cornerRadius: radius, style: .continuous)
                     .fill(fill ?? theme.glass)
-                    .overlay(alignment: .top) {
-                        if showInset {
-                            RoundedRectangle(cornerRadius: radius, style: .continuous)
-                                .fill(theme.inset)
-                                .frame(height: 1)
-                                .padding(.horizontal, radius / 2)
-                        }
-                    }
-                    .overlay {
-                        RoundedRectangle(cornerRadius: radius, style: .continuous)
-                            .strokeBorder(theme.hairline, lineWidth: 1)
-                    }
+            }
+            // Strokes ON TOP of content: scrolling rows and dividers would
+            // otherwise paint over the border and poke past the corners.
+            .overlay {
+                RoundedRectangle(cornerRadius: radius, style: .continuous)
+                    .strokeBorder(theme.hairline, lineWidth: 1)
+            }
+            // The §2 "inset" top highlight, as the prototype does it: an inner
+            // bevel that follows the top curve and fades out — not a bar.
+            .overlay {
+                if showInset {
+                    RoundedRectangle(cornerRadius: radius, style: .continuous)
+                        .strokeBorder(
+                            LinearGradient(
+                                stops: [
+                                    .init(color: theme.inset, location: 0),
+                                    .init(color: .clear, location: 0.25),
+                                ],
+                                startPoint: .top, endPoint: .bottom
+                            ),
+                            lineWidth: 1
+                        )
+                }
             }
     }
 }

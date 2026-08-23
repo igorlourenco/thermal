@@ -37,9 +37,15 @@ struct SettingsView: View {
             row(divider: true) {
                 rowLabel("Appearance")
                 SegmentedPills(
-                    options: [(Appearance.light, "Light"), (Appearance.dark, "Dark")],
-                    selection: $model.appearance
+                    options: [
+                        (Appearance.system, "circle.lefthalf.filled"),
+                        (Appearance.light, "sun.max"),
+                        (Appearance.dark, "moon"),
+                    ],
+                    selection: $model.appearance,
+                    icons: true
                 )
+                .help("System · Light · Dark")
             }
 
             row(divider: true) {
@@ -132,7 +138,9 @@ struct SettingsView: View {
                         .foregroundStyle(theme.textStrong)
                     Spacer()
                     if active {
-                        Text("✓").font(.system(size: 11)).foregroundStyle(theme.textDim)
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 9, weight: .semibold))
+                            .foregroundStyle(theme.textDim)
                     }
                 }
                 .padding(.vertical, 8)
@@ -176,11 +184,16 @@ private struct StyleDropdownButton: View {
     @State private var hovering = false
 
     var body: some View {
-        Text("\(label) ⌄")
-            .font(.system(size: 12))
-            .foregroundStyle(hovering ? theme.textStrong : theme.textMid)
-            .padding(.vertical, 4)
-            .padding(.horizontal, 10)
+        HStack(spacing: 5) {
+            Text(label)
+                .font(.system(size: 12))
+            Image(systemName: "chevron.down")
+                .font(.system(size: 8, weight: .semibold))
+                .opacity(0.7)
+        }
+        .foregroundStyle(hovering ? theme.textStrong : theme.textMid)
+        .padding(.vertical, 4)
+        .padding(.horizontal, 10)
             .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(theme.chipBg))
             .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(theme.hairline, lineWidth: 1))
             .contentShape(Rectangle())

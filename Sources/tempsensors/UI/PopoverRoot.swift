@@ -70,8 +70,19 @@ struct SubstrateBackground: View {
 struct PopoverRoot: View {
     @EnvironmentObject var model: ThermalModel
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.colorScheme) private var systemScheme
 
-    private var theme: Theme { Theme(appearance: model.appearance) }
+    private var theme: Theme {
+        Theme(appearance: model.appearance.resolved(systemIsDark: systemScheme == .dark))
+    }
+
+    private var forcedScheme: ColorScheme? {
+        switch model.appearance {
+        case .system: return nil
+        case .dark: return .dark
+        case .light: return .light
+        }
+    }
 
     private var isOnboarding: Bool {
         if case .onboarding = model.phase { return true }
@@ -114,7 +125,7 @@ struct PopoverRoot: View {
         }
         .frame(width: 360, height: 520)
         .environment(\.theme, theme)
-        .preferredColorScheme(model.appearance == .dark ? .dark : .light)
+        .preferredColorScheme(forcedScheme)
         .onAppear { model.popoverVisible = true }
         .onDisappear {
             model.popoverVisible = false

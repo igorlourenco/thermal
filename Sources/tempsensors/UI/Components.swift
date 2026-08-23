@@ -170,19 +170,26 @@ struct SegmentedPills<T: Hashable>: View {
     let options: [(value: T, label: String)]
     @Binding var selection: T
     var micro = false   // History range style: 10pt uppercase tracked
+    var icons = false   // labels are SF Symbol names
 
     var body: some View {
         HStack(spacing: 3) {
             ForEach(options, id: \.value) { option in
                 Group {
-                    if micro {
+                    if icons {
+                        Image(systemName: option.label)
+                            .font(.system(size: 10.5))
+                            .frame(height: 13)
+                    } else if micro {
                         Text(option.label).microcaps(10, tracking: 0.1)
                     } else {
                         Text(option.label).font(.system(size: 11))
                     }
                 }
+                .lineLimit(1)
+                .fixedSize()
                 .foregroundStyle(selection == option.value ? theme.textStrong : theme.textDim)
-                .padding(.horizontal, micro ? 9 : 11)
+                .padding(.horizontal, micro ? 9 : (icons ? 10 : 11))
                 .padding(.vertical, 3)
                 .background(
                     RoundedRectangle(cornerRadius: micro ? 5 : 4, style: .continuous)

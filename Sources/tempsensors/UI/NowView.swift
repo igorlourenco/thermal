@@ -63,9 +63,9 @@ struct NowView: View {
                 .lineSpacing(3)
                 .foregroundStyle(theme.textMid)
                 .lineLimit(2)
-                .padding(.top, 10)
-                .frame(height: 38, alignment: .topLeading)
+                .frame(height: 40, alignment: .topLeading)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 10)
         }
     }
 

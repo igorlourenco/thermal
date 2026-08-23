@@ -9,8 +9,11 @@ import AppKit
 struct ZenView: View {
     @EnvironmentObject var model: ThermalModel
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var systemScheme
 
-    private var theme: Theme { Theme(appearance: model.appearance) }
+    private var theme: Theme {
+        Theme(appearance: model.appearance.resolved(systemIsDark: systemScheme == .dark))
+    }
 
     var body: some View {
         let theme = theme
@@ -81,7 +84,13 @@ struct ZenView: View {
         .frame(width: 660, height: 420)
         .environment(\.theme, theme)
         .environmentObject(model)
-        .preferredColorScheme(model.appearance == .dark ? .dark : .light)
+        .preferredColorScheme({
+            switch model.appearance {
+            case .system: return nil
+            case .dark: return .dark
+            case .light: return .light
+            }
+        }())
         .background(WindowChrome())
     }
 
