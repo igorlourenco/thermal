@@ -12,7 +12,7 @@ Public endpoints (baked into shipped builds — don't move them casually):
 ## One-time setup
 
 1. **Developer ID certificate** (needs the paid Apple Developer Program):
-   Xcode → Settings → Accounts → team `UKST87CRGF` → Manage Certificates →
+   Xcode → Settings → Accounts → team `P73HCK6SHJ` → Manage Certificates →
    `+` → **Developer ID Application**. Verify:
 
    ```bash
@@ -24,7 +24,7 @@ Public endpoints (baked into shipped builds — don't move them casually):
 
    ```bash
    xcrun notarytool store-credentials thermal \
-       --apple-id <your-apple-id> --team-id UKST87CRGF --password <app-specific-pw>
+       --apple-id <your-apple-id> --team-id P73HCK6SHJ --password <app-specific-pw>
    ```
 
 3. **Back up the Sparkle EdDSA key** — it lives only in this Mac's login
@@ -46,7 +46,7 @@ Public endpoints (baked into shipped builds — don't move them casually):
 #    CFBundleVersion             1   -> 2     (what Sparkle compares)
 
 # 2. build, sign, notarize, staple (paste your exact identity from step 1 above)
-SIGN_IDENTITY="Developer ID Application: Igor Lourenco (UKST87CRGF)" scripts/dmg.sh
+SIGN_IDENTITY="Developer ID Application: Igor Lourenco (P73HCK6SHJ)" scripts/dmg.sh
 xcrun notarytool submit dist/Thermal-1.1.dmg --keychain-profile thermal --wait
 xcrun stapler staple dist/Thermal-1.1.dmg
 
