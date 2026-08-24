@@ -305,12 +305,13 @@ one decimal place, converted with the unit setting.
 
 ### 4.5 History
 
-Header: `← HISTORY` / `TODAY` · `7 DAYS` · `30 DAYS`.
+Header: `← HISTORY` / `PAST HOUR` · `TODAY` · `7 DAYS` · `30 DAYS`.
 
-A subtitle on the left and a three-way segmented control on the right
-(`24H / 7D / 30D`, radius 7 container, radius 5 pills, active pill `hoverBg` and
-`textStrong`). All three ranges are real: each has its own series, axis labels,
-annotations, and subtitle.
+A subtitle on the left and a four-way segmented control on the right
+(`1H / 24H / 7D / 30D`, radius 7 container, radius 5 pills, active pill
+`hoverBg` and `textStrong`). All ranges are real: each has its own series,
+axis labels, annotations, and subtitle. 1h uses the same time-formatted axis
+and annotations as 24h.
 
 
 | Range | Subtitle                                   | Axis                                  | Annotations                                                |

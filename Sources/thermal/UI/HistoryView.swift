@@ -2,7 +2,7 @@ import SwiftUI
 
 // =============================================================================
 // HistoryView.swift — stacked multi-day charts (§4.5)
-// 24h and 7d ranges draw from real persisted minute samples; 30d shows an
+// 1h, 24h and 7d ranges draw from real persisted minute samples; 30d shows an
 // honest empty state (the store keeps 7 days for now). Subtitles are derived
 // from the data, never invented.
 // =============================================================================
@@ -232,7 +232,7 @@ struct HistoryView: View {
     private func timeLabel(_ date: Date) -> String {
         let formatter = DateFormatter()
         switch model.range {
-        case .day: formatter.dateFormat = "h:mm a"
+        case .hour, .day: formatter.dateFormat = "h:mm a"
         case .week: formatter.dateFormat = "EEE"
         case .month: formatter.dateFormat = "MMM d"
         }
@@ -266,7 +266,7 @@ struct HistoryView: View {
 
     private var axisLabels: [String] {
         let formatter = DateFormatter()
-        formatter.dateFormat = model.range == .day ? "HH:mm" : "EEE"
+        formatter.dateFormat = model.range.hours <= 24 ? "HH:mm" : "EEE"
         let span = model.range.hours * 3600
         let start = Date().addingTimeInterval(-span)
         let marks = [0.0, 0.25, 0.5, 0.75].map {

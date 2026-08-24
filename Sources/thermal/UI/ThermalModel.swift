@@ -42,10 +42,11 @@ enum MenuBarStyle: String, CaseIterable {
 }
 
 enum HistoryRange: String, CaseIterable {
-    case day, week, month
+    case hour, day, week, month
 
     var segmentLabel: String {
         switch self {
+        case .hour: return "1h"
         case .day: return "24h"
         case .week: return "7d"
         case .month: return "30d"
@@ -54,6 +55,7 @@ enum HistoryRange: String, CaseIterable {
 
     var headerWord: String {
         switch self {
+        case .hour: return "Past hour"
         case .day: return "Today"
         case .week: return "7 days"
         case .month: return "30 days"
@@ -62,6 +64,7 @@ enum HistoryRange: String, CaseIterable {
 
     var eventsHeaderWord: String {
         switch self {
+        case .hour: return "Last hour"
         case .day: return "Today"
         case .week: return "Last 7 days"
         case .month: return "Last 30 days"
@@ -70,6 +73,7 @@ enum HistoryRange: String, CaseIterable {
 
     var periodWord: String {
         switch self {
+        case .hour: return "in the last hour"
         case .day: return "today"
         case .week: return "this week"
         case .month: return "this month"
@@ -78,6 +82,7 @@ enum HistoryRange: String, CaseIterable {
 
     var hours: Double {
         switch self {
+        case .hour: return 1
         case .day: return 24
         case .week: return 7 * 24
         case .month: return 30 * 24
