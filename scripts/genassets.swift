@@ -269,6 +269,20 @@ func renderDMGBackground(scale: CGFloat) -> CGImage {
                  font: .systemFont(ofSize: 13), color: CGColor(gray: 1, alpha: 0.5),
                  tracking: 0, centerX: W / 2, topY: y, canvasH: H)
 
+    // Label plates. Finder draws icon labels in BLACK whenever a window has a
+    // custom background picture — in dark mode too — so the label zone must be
+    // light. One warm paper pill under each icon's label position.
+    // Sized to each label ("Thermal" / "Applications" at 12pt) + 15px padding,
+    // centred on the label text's optical (cap-height) centre — empirically
+    // y 290; Finder's label baseline isn't documented, calibrated on-screen.
+    for (iconX, plateW): (CGFloat, CGFloat) in [(197, 76), (463, 102)] {
+        let plate = CGRect(x: iconX - plateW / 2, y: H - 289 - 11, width: plateW, height: 22)
+        let pill = CGPath(roundedRect: plate, cornerWidth: 11, cornerHeight: 11, transform: nil)
+        ctx.addPath(pill)
+        ctx.setFillColor(hex(0xDCD6CD, 0.92))
+        ctx.fillPath()
+    }
+
     // Arrow between the icons, at the icon row's vertical centre (y 206 top-down).
     let midY = H - 206
     let ruleW: CGFloat = 56

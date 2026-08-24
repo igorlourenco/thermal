@@ -106,7 +106,9 @@ struct Theme {
     var hoverBg: Color  { appearance == .dark ? .white.opacity(0.09) : .black.opacity(0.05) }
     var rail: Color     { appearance == .dark ? .white.opacity(0.12) : .black.opacity(0.12) }
     var knob: Color     { appearance == .dark ? Color(hex: 0xF4F4F8) : .white }
-    var toggleOn: Color { appearance == .dark ? .white.opacity(0.24) : .black.opacity(0.28) }
+    // Brand amber (the chip mark's top gradient stop) so the on-state reads
+    // as on and stays in the product's palette.
+    var toggleOn: Color { Color(hex: 0xF5BB6A) }
 
     var crosshair: Color       { appearance == .dark ? .white.opacity(0.25) : .black.opacity(0.25) }
     var neutralLine: Color     { appearance == .dark ? .white.opacity(0.5) : Color(hex: 0x141418, alpha: 0.42) }

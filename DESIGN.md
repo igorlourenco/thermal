@@ -98,7 +98,7 @@ you want to convert precisely at build time.
 | `hoverBg`                | white @ 9%                                     |
 | `rail`                   | white @ 12%                                    |
 | `knob`                   | `#F4F4F8`                                      |
-| `toggleOn`               | white @ 24%                                    |
+| `toggleOn`               | `#F5BB6A` (brand amber, both modes)            |
 | `crosshair`              | white @ 25%                                    |
 | `neutralLine`            | white @ 50%                                    |
 | `neutralLineSoft`        | white @ 32%                                    |
@@ -130,7 +130,7 @@ you want to convert precisely at build time.
 | `hoverBg`          | black @ 5%                                     |
 | `rail`             | black @ 12%                                    |
 | `knob`             | `#FFFFFF`                                      |
-| `toggleOn`         | black @ 28%                                    |
+| `toggleOn`         | `#F5BB6A` (brand amber, both modes)            |
 | `crosshair`        | black @ 25%                                    |
 | `neutralLine`      | `#141418` @ 42%                                |
 | `neutralLineSoft`  | `#141418` @ 28%                                |
