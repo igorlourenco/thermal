@@ -3,6 +3,62 @@
     <channel>
         <title>Thermal</title>
         <item>
+            <title>1.2</title>
+            <pubDate>Mon, 24 Aug 2026 12:35:04 -0300</pubDate>
+            <sparkle:version>3</sparkle:version>
+            <sparkle:shortVersionString>1.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <description><![CDATA[<!DOCTYPE html>
+<!-- Release-notes template (installer.md §4). Sparkle renders this inside its
+     recessed box; these styles supply the type inside it: 12.5px semibold
+     version + dimmed date, then ·-led 11.5/1.5 lines, last line dimmer folding
+     in the previous patch. Duplicate per release as
+     dist/updates/Thermal-<version>.html and fill in real, user-visible
+     changes — never commit messages. -->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    body {
+        margin: 0;
+        padding: 12px 14px;
+        background: rgb(28, 28, 31);
+        font: 11.5px/1.5 -apple-system, "Helvetica Neue", sans-serif;
+        color: rgba(255, 255, 255, 0.62);
+    }
+    h2 {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #F2F2F4;
+        margin: 0 0 6px;
+    }
+    h2 .date {
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.4);
+        margin-left: 6px;
+    }
+    ul { list-style: none; margin: 0; padding: 0; }
+    li::before { content: "· "; }
+    .prev { color: rgba(255, 255, 255, 0.4); }
+</style>
+</head>
+<body>
+<h2>Thermal 1.2 <span class="date">Aug 24, 2026</span></h2>
+<ul>
+    <li>History has a new 1-hour view, and opens on it.</li>
+    <li>Charts, peaks and the throttle count all follow the hour view too.</li>
+</ul>
+</body>
+</html>
+]]></description>
+            <enclosure url="https://github.com/igorlourenco/thermal/releases/download/v1.2/Thermal-1.2.dmg" length="4447298" type="application/octet-stream" sparkle:edSignature="rgL4a7HRDHF1LgZg9xE3fAciLpTqt1hlV3uU1f3fvKpJ4M9MjTSdABlQkECQESUYOEZT5BAfqx+QksIqrnzSBA=="/>
+            <sparkle:deltas>
+                <enclosure url="https://github.com/igorlourenco/thermal/releases/download/v1.2/Thermal3-2.delta" sparkle:deltaFrom="2" length="58662" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="NY18PUndmj27sSuLwjjAsc37yQdqecOnmV0/IUkP7RkiKzcoQB0TkQOZLabokka6mIDXcSnzNV3Pq+fjfhYfAQ=="/>
+                <enclosure url="https://github.com/igorlourenco/thermal/releases/download/v1.2/Thermal3-1.delta" sparkle:deltaFrom="1" length="100714" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="qyYyrppPaV2mYuKGdYnZQB+kp7D/tvP+KHPdcrTqoY1F6yYtZtRW418l5sqA/1bqL5NZ14Fu7J71/H7Vq8OsDA=="/>
+            </sparkle:deltas>
+        </item>
+        <item>
             <title>1.1</title>
             <pubDate>Mon, 24 Aug 2026 11:53:00 -0300</pubDate>
             <sparkle:version>2</sparkle:version>
@@ -54,7 +110,7 @@
 </body>
 </html>
 ]]></description>
-            <enclosure url="https://github.com/igorlourenco/thermal/releases/download/v1.1/Thermal-1.1.dmg" length="4447029" type="application/octet-stream" sparkle:edSignature="LW9xV3bRIEJ54PRyuCY5GvJtN+XESCZ5yJe1YZc3pTceVnK/Ti8ECJu+pZIWc88fxarSkIyk9A1d5C1HslBFBQ=="/>
+            <enclosure url="https://github.com/igorlourenco/thermal/releases/download/v1.2/Thermal-1.1.dmg" length="4447029" type="application/octet-stream" sparkle:edSignature="LW9xV3bRIEJ54PRyuCY5GvJtN+XESCZ5yJe1YZc3pTceVnK/Ti8ECJu+pZIWc88fxarSkIyk9A1d5C1HslBFBQ=="/>
             <sparkle:deltas>
                 <enclosure url="https://github.com/igorlourenco/thermal/releases/download/v1.1/Thermal2-1.delta" sparkle:deltaFrom="1" length="91662" type="application/octet-stream" sparkle:deltaFromSparkleExecutableSize="977808" sparkle:deltaFromSparkleLocales="de,he,ar,el,ja,fa,uk" sparkle:edSignature="xEMvEK0gMC8BC7NqNmmUIg14n8a93rhEXJumR911hu+Vt3kqWiZR43PLxE5bboM4OOQTgJDHIAEGig++Y9XHAQ=="/>
             </sparkle:deltas>
@@ -108,7 +164,7 @@
 </body>
 </html>
 ]]></description>
-            <enclosure url="https://github.com/igorlourenco/thermal/releases/download/v1.1/Thermal-1.0.dmg" length="4443085" type="application/octet-stream" sparkle:edSignature="tMRa5m/wmmijZxZYDBDtTs3zMKsDPcQ/iK89UeXL3UiTOfCqAH5lfUn3D4UIS6iFlk4KDoITOBH4ibceVABeBA=="/>
+            <enclosure url="https://github.com/igorlourenco/thermal/releases/download/v1.2/Thermal-1.0.dmg" length="4443085" type="application/octet-stream" sparkle:edSignature="tMRa5m/wmmijZxZYDBDtTs3zMKsDPcQ/iK89UeXL3UiTOfCqAH5lfUn3D4UIS6iFlk4KDoITOBH4ibceVABeBA=="/>
         </item>
     </channel>
 </rss>
