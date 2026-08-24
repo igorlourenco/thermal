@@ -11,8 +11,13 @@ import SwiftUI
 /// Normalized samples for a polyline. `v` is 0…1 (1 = highest in window).
 struct ChartSeries {
     let values: [Double]
+    /// 0…1 x-position per sample. nil = evenly spaced by index. History
+    /// charts pass time fractions so a range wider than the recorded data
+    /// shows the data compressed at the right, not stretched to fill.
+    let xFractions: [Double]?
 
-    init(celsius: [Double]) {
+    init(celsius: [Double], xFractions: [Double]? = nil) {
+        self.xFractions = xFractions
         guard let lo = celsius.min(), let hi = celsius.max(), hi - lo > 0.5 else {
             values = celsius.map { _ in 0.5 }
             return
@@ -27,9 +32,14 @@ struct ChartSeries {
 
     /// Prototype poly(): y from 6 (v=1) down to height-4 (v=0).
     func point(_ i: Int, in size: CGSize) -> CGPoint {
-        let n = max(values.count - 1, 1)
+        let x: CGFloat
+        if let fractions = xFractions, i < fractions.count {
+            x = CGFloat(fractions[i]) * size.width
+        } else {
+            x = CGFloat(i) / CGFloat(max(values.count - 1, 1)) * size.width
+        }
         return CGPoint(
-            x: CGFloat(i) / CGFloat(n) * size.width,
+            x: x,
             y: (size.height - 4) - values[i] * (size.height - 10)
         )
     }

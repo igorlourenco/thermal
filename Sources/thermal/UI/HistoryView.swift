@@ -155,7 +155,14 @@ struct HistoryView: View {
         annotationColor: Color
     ) -> some View {
         let data = samples(group)
-        let series = ChartSeries(celsius: data.map(\.celsius))
+        // Time-positioned x, so a 7d window with one day of data shows that
+        // day in its right seventh instead of stretched across the width.
+        let span = model.range.hours * 3600
+        let windowStart = Date().addingTimeInterval(-span)
+        let fractions = data.map {
+            min(1, max(0, $0.date.timeIntervalSince(windowStart) / span))
+        }
+        let series = ChartSeries(celsius: data.map(\.celsius), xFractions: fractions)
         let meta: String = {
             if metaPrefix == "now" {
                 return current(group).map { "now \(model.fmt($0))" } ?? ""
@@ -179,12 +186,24 @@ struct HistoryView: View {
                 .frame(height: height)
 
             if let annotation {
+                // Anchor from the left in the left half, from the right in
+                // the right half, so long labels grow inward and never
+                // overflow the card.
                 GeometryReader { geo in
-                    Text(annotation.text)
-                        .microcaps(9, tracking: 0.14)
-                        .foregroundStyle(annotationColor)
-                        .fixedSize()
-                        .offset(x: min(annotation.fraction, 0.72) * geo.size.width)
+                    let w = geo.size.width
+                    let trailing = annotation.fraction > 0.5
+                    ZStack(alignment: trailing ? .topTrailing : .topLeading) {
+                        Color.clear
+                        Text(annotation.text)
+                            .microcaps(9, tracking: 0.14)
+                            .foregroundStyle(annotationColor)
+                            .lineLimit(1)
+                            .offset(x: trailing
+                                    ? -(1 - annotation.fraction) * w
+                                    : annotation.fraction * w)
+                    }
+                    .frame(width: w)
+                    .clipped()
                 }
                 .frame(height: 13)
             }
