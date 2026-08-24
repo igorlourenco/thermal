@@ -1,8 +1,16 @@
 # Releasing Thermal
 
-Ship path: signed + notarized DMG on a GitHub release, Sparkle feed committed
-to `main`. Installed apps check the feed daily and auto-install (or Settings →
-Check now).
+Ship path: signed + notarized DMG on a GitHub release, Sparkle feed on the
+public releases repo. Installed apps check the feed daily and auto-install
+(or Settings → Check now).
+
+Two repos:
+
+- **`igorlourenco/thermal-app`** (private) — the source. This repo; `origin`.
+- **`igorlourenco/thermal`** (public) — releases-only shell: `appcast.xml`,
+  README, and the DMGs as release assets. Shipped apps poll it; the remote is
+  `releases` here, but publishing goes through `gh` / `scripts/appcast.sh
+  --publish`, never a source push.
 
 Public endpoints (baked into shipped builds — don't move them casually):
 
@@ -55,12 +63,15 @@ xcrun stapler staple dist/Thermal-1.1.dmg
 mkdir -p dist/updates
 cp dist/Thermal-1.1.dmg dist/updates/
 cp scripts/release-notes-template.html dist/updates/Thermal-1.1.html  # then EDIT it:
-#    user-visible changes, not commits (installer.md §4)
-scripts/appcast.sh
+#    user-visible changes, not commits
 
-# 4. publish — appcast on main, DMG on the release
-git add appcast.xml && git commit -m "Release 1.1" && git push
-gh release create v1.1 dist/Thermal-1.1.dmg --title "Thermal 1.1" --notes "See in-app release notes."
+# 4. publish — DMG on the public repo's release FIRST, then the appcast
+#    (never point the feed at a download that isn't live yet)
+gh release create v1.1 dist/Thermal-1.1.dmg -R igorlourenco/thermal --title "Thermal 1.1" --notes "See in-app release notes."
+scripts/appcast.sh --publish
+
+# 5. commit the source (private repo)
+git add -A && git commit -m "Release 1.1" && git push
 ```
 
 First install: send the DMG (or the release link). They drag to Applications,

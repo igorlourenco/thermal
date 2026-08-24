@@ -48,3 +48,14 @@ PREFIX="${DOWNLOAD_URL_PREFIX:-https://github.com/igorlourenco/thermal/releases/
     "$UPDATES"
 
 echo "Wrote appcast.xml (newest: $VERSION, downloads: $PREFIX)"
+
+# --publish: push appcast.xml to the public releases repo (the source repo is
+# private; shipped apps poll github.com/igorlourenco/thermal).
+if [ "${1:-}" = "--publish" ]; then
+    SHA=$(gh api repos/igorlourenco/thermal/contents/appcast.xml -q .sha 2> /dev/null || true)
+    gh api -X PUT repos/igorlourenco/thermal/contents/appcast.xml \
+        -f message="Update appcast (newest: $VERSION)" \
+        -f content="$(base64 -i appcast.xml)" \
+        ${SHA:+-f sha="$SHA"} > /dev/null
+    echo "Published appcast.xml to igorlourenco/thermal"
+fi
