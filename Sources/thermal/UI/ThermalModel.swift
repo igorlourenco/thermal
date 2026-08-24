@@ -102,7 +102,7 @@ final class ThermalModel: ObservableObject {
     /// the header back affordance pop/reset.
     private var backStack: [Screen] = []
     @Published var detailGroup: SensorGroup = .cpuPerformance
-    @Published var range: HistoryRange = .day
+    @Published var range: HistoryRange = .hour
     @Published var query = ""
     @Published var popoverVisible = false
 
