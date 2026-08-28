@@ -10,8 +10,8 @@
 #      scripts/release-notes-template.html. Write user-visible changes, not
 #      commits (installer.md §4).
 #   4. scripts/appcast.sh   -> writes appcast.xml at the repo root
-#   5. commit appcast.xml, push, attach the DMG to the GitHub release for the
-#      version tag (the URLs below assume tag v<version>)
+#   5. attach the DMG to the GitHub release for tag v<version>, then
+#      scripts/appcast.sh --publish (commit + push appcast.xml)
 #
 # Signing uses the EdDSA key in the login Keychain (created once by
 #   .build/artifacts/sparkle/Sparkle/bin/generate_keys
@@ -49,13 +49,16 @@ PREFIX="${DOWNLOAD_URL_PREFIX:-https://github.com/igorlourenco/thermal/releases/
 
 echo "Wrote appcast.xml (newest: $VERSION, downloads: $PREFIX)"
 
-# --publish: push appcast.xml to the public releases repo (the source repo is
-# private; shipped apps poll github.com/igorlourenco/thermal).
+# --publish: commit appcast.xml and push main. Shipped apps poll
+# raw.githubusercontent.com/igorlourenco/thermal/main/appcast.xml, so the feed
+# goes live the moment the push lands. Run this AFTER the DMG is on the release.
 if [ "${1:-}" = "--publish" ]; then
-    SHA=$(gh api repos/igorlourenco/thermal/contents/appcast.xml -q .sha 2> /dev/null || true)
-    gh api -X PUT repos/igorlourenco/thermal/contents/appcast.xml \
-        -f message="Update appcast (newest: $VERSION)" \
-        -f content="$(base64 -i appcast.xml)" \
-        ${SHA:+-f sha="$SHA"} > /dev/null
-    echo "Published appcast.xml to igorlourenco/thermal"
+    if git diff --quiet -- appcast.xml && git diff --cached --quiet -- appcast.xml; then
+        echo "appcast.xml unchanged, nothing to publish"
+        exit 0
+    fi
+    git add appcast.xml
+    git commit -m "Appcast for $VERSION" -- appcast.xml
+    git push origin HEAD:main
+    echo "Published appcast.xml (newest: $VERSION)"
 fi
